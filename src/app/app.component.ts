@@ -1,4 +1,7 @@
 import { Component } from '@angular/core';
+import { environment } from './../environments/environment';
+//import { ChartsComponent } from './components/charts.component'
+
 
 @Component({
   selector: 'app-root',
@@ -7,4 +10,6 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'j1-charts';
+
+  listWeb:String = environment.listWeb;
 }

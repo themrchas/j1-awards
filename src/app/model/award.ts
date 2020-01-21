@@ -3,7 +3,17 @@ import * as moment from 'moment';
 
 export class Award {
 
+    private static awardBreakDown: any = {};
+
     private _awardNumber: string;
+    private _awardType: string;
+    private _awardSubType: string;
+
+    private _organization: string;
+    private _subordinateUnit: string;
+
+
+
     private _dateAccepted: string;
     private _dateAwardComplete: string;
 
@@ -22,9 +32,17 @@ export class Award {
     private _dateToSOCOM: string;
 
     constructor(rawAward: any) {
+
         this._awardNumber  = rawAward.AwardNumber || null;
+        this._awardType = rawAward.AwardType || null;
+        this._awardSubType = rawAward.AwardSubType || null;
+
+        this._organization = rawAward.Organization || null;
+        this._subordinateUnit = rawAward.subOrganization || null;
+
+
         this._dateAccepted = rawAward.DateAccepted || null;
-       this._dateAwardComplete = rawAward.DateComplete || null;
+        this._dateAwardComplete = rawAward.DateComplete || null;
         this._dateSentToQC = rawAward.DateSentToQc || null;
         this._dateCompleteQC = rawAward.DateCompletedQC || null;
         this._dateStartBoarding = rawAward.DateSentToBoarding || null;
@@ -34,10 +52,39 @@ export class Award {
         this._bm3VoteDate = rawAward.BoardMember3VoteDate || null;
         this._bm4VoteDate = rawAward.BoardMember4VoteDate || null;
         this._dateToHRC = rawAward.DateToHRC || null;
-        this._dateToSOCOM = rawAward._dateToSOCOM || null;
-        
+        this._dateToSOCOM = rawAward.dateToSOCOM || null;
+
+        this.categorizeAward(this._organization,this._awardType,this._subordinateUnit,this._awardSubType)
+
 
         
+    }
+
+    private categorizeAward(organization: string,  awardType: string, subOrg?: string, awardSubtype?: string ) {
+
+      //  let regex: RegExp   = /^(\S+)-\d/;
+
+      console.log('categorizeAward: start');
+
+
+        //Set the award type
+        let award: string = (awardSubtype !== null) ? awardSubtype : awardType;
+
+        //Set the submitting unit
+        let unit: string = (subOrg !== null) ? subOrg : organization;
+
+        //Create entry if either award type or award type + unit does not exit
+        if (!Award.awardBreakDown[unit] || !Award.awardBreakDown[unit][award]) {
+          //  Award.awardBreakDown[unit][award] = 1;
+          Award.awardBreakDown[unit] = {};
+          Award.awardBreakDown[unit][award] = 1;
+        }
+        else 
+            Award.awardBreakDown[unit][award] =  Award.awardBreakDown[unit][award] + 1;
+
+        console.log('categorizeAward:finish')
+
+
     }
 
     getData(): string {

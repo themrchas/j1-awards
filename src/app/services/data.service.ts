@@ -9,9 +9,9 @@ import {Award} from './../model/award';
 @Injectable({
   providedIn: 'root'
 })
-export class DataService {
 
- 
+//A middleware class that bridges the SharePoint specific calls and components that require SharePoint data that has been organized in some logical fashion
+export class DataService {
 
   constructor(private spService: SpService) { }
 
@@ -39,7 +39,7 @@ export class DataService {
 
   private _parseAwardJson(awards: any) {
     let processed = awards.d.results.map(function (el) {
-      console.log('dataService._parseAwardJson: el is', el);
+      //console.log('dataService._parseAwardJson: el is', el);
     
       return new Award(el);
 
@@ -50,6 +50,12 @@ export class DataService {
     
     return processed;
 
+  }
+
+  public getAwardBreakdown() : any  {
+
+    return Award.getAwardBreakdown();
+    //return 'blah';
   }
 
 

@@ -122,7 +122,9 @@ export class Award {
     
     }
 
-        
+      public static getAwardBreakdown(): any {
+           return Award.awardBreakDown;
+      }
 
 
 }

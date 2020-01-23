@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { DataService } from './../../services/data.service';
+//import { DataService } from './../../services/data.service';
+import { DataProviderService } from './../../services/data-provider.service';
 
 import {Award} from './../../model/award';
 
@@ -15,21 +16,23 @@ export class ChartsComponent implements OnInit {
 
   //testAwards: any = { name:"Beavis", occupation:"Slacker"};
 
-  constructor(private dataService: DataService) { }
+  constructor(private dataProvider: DataProviderService) { }
 
   ngOnInit() {
 
-    this.getAwardData();
+    this.awards = this.dataProvider.awards;
+
+  //  this.getAwardData();
   }
 
-  private testObserver ={
+  /*private testObserver ={
     next: x => { console.log('Observer got a next value: ' + x); this.awards= x; },
   error: err => console.error('Observer got an error: ' + err),
-  complete: () => console.log('Observer got a complete notification'),
-  }
+  complete: () => console.log('Observer got a complete notification'), 
+  } */
 
 
-  private  getAwardData() {
+  /*private  getAwardData() {
 
     //let award: Award = new Award({AwardNumber:"HQ-001",DateAccepted:"1/2/2020"});
     //console.log(award.getData());
@@ -39,6 +42,6 @@ export class ChartsComponent implements OnInit {
    // this.dataService._getData().subscribe(this.testObserver);
    this.dataService.getData().subscribe(this.testObserver);
 
-  }
+  } */
 
 }

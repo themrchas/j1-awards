@@ -64,7 +64,7 @@ export class Award {
 
       //  let regex: RegExp   = /^(\S+)-\d/;
 
-      console.log('categorizeAward: start');
+    //  console.log('categorizeAward: start');
 
 
         //Set the award type
@@ -82,7 +82,7 @@ export class Award {
         else 
             Award.awardBreakDown[unit][award] =  Award.awardBreakDown[unit][award] + 1;
 
-        console.log('categorizeAward:finish')
+     //   console.log('categorizeAward:finish')
 
 
     }

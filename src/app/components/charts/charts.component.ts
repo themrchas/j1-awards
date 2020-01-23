@@ -13,6 +13,8 @@ export class ChartsComponent implements OnInit {
   awards: Award[];
   //awards<Array<Award>> = null
 
+  //testAwards: any = { name:"Beavis", occupation:"Slacker"};
+
   constructor(private dataService: DataService) { }
 
   ngOnInit() {

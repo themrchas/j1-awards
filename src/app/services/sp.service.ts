@@ -16,7 +16,9 @@ export class SpService implements OnInit {
  // const restEndPoint: String = environment.listWeb.
  // restEndPoint:string = "http://localhost:8080/sites/dev/socafdev";
  //restEndPoint:string = "http://sp-dev-sharepoi/sites/dev/socafdev/_api/web/lists/getbytitle('AwardsMetrics')/items(1)";
- restEndPoint:string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('AwardsMetrics')/items";
+ awardListRestEndPoint:string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('AwardsMetrics')/items";
+
+ awardMatrixListRestEndPoint: string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('Awards Matrix Slide')/items";
  
 
   constructor(private httpClient: HttpClient) { }
@@ -32,16 +34,28 @@ export class SpService implements OnInit {
 
   //private getData(restEndPoint:String, restHeaders:String):Observable<any> {
      getData():Observable<any> {
-       console.log('sp.service.getData: Executing httpClient with endpoint',this.restEndPoint,'and header',this.httpHeaders);
-    return this.httpClient.get(this.restEndPoint, {headers: this.httpHeaders})
+       console.log('sp.service.getData: Executing httpClient with endpoint',this.awardListRestEndPoint,'and header',this.httpHeaders);
+    return this.httpClient.get(this.awardListRestEndPoint, {headers: this.httpHeaders})
       .pipe (
-              tap(val => console.log('tap: Http call returned', val))
+              tap(val => console.log('sp.service.getData tap: Http call returned', val))
            //  map(el =>  this._parseAwardJson(el) ),
         //   map(el => { return this._parseAwardJson(el)} ),
          //     tap(el => console.log('mapped data in getData is',el))
             )
 
     
+  }
+
+  getMatrixHeaders():Observable<any> {
+
+    console.log('sp.service.getData: Executing httpClient with endpoint',this.awardMatrixListRestEndPoint,'and header',this.httpHeaders);
+    return this.httpClient.get(this.awardMatrixListRestEndPoint, {headers: this.httpHeaders})
+      .pipe (
+              tap(val => console.log('sp.service.geMatrixLabels tap: Http call returned', val))
+          
+            )
+
+
   }
 
    

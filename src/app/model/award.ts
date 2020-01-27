@@ -74,13 +74,23 @@ export class Award {
         let unit: string = (subOrg !== null) ? subOrg : organization;
 
         //Create entry if either award type or award type + unit does not exit
-        if (!Award.awardBreakDown[unit] || !Award.awardBreakDown[unit][award]) {
-          //  Award.awardBreakDown[unit][award] = 1;
+        if (!Award.awardBreakDown[unit]) {
+            Award.awardBreakDown[unit] = {};
+            Award.awardBreakDown[unit][award] = 1;
+        }
+        else if (!Award.awardBreakDown[unit][award])
+            Award.awardBreakDown[unit][award] = 1;
+        else
+            Award.awardBreakDown[unit][award] =  Award.awardBreakDown[unit][award] + 1;
+
+
+      /*  if (!Award.awardBreakDown[unit] || !Award.awardBreakDown[unit][award]) {
+          
           Award.awardBreakDown[unit] = {};
           Award.awardBreakDown[unit][award] = 1;
         }
         else 
-            Award.awardBreakDown[unit][award] =  Award.awardBreakDown[unit][award] + 1;
+            Award.awardBreakDown[unit][award] =  Award.awardBreakDown[unit][award] + 1; */
 
      //   console.log('categorizeAward:finish')
 
@@ -99,8 +109,8 @@ export class Award {
         const completeDate = moment(this._dateAwardComplete,"YYYY-MM-DD");
         const acceptedDate = moment(this._dateAccepted,"YYYY-MM-DD");
 
-        console.log('completeDate', completeDate);
-        console.log('acceptedDate', acceptedDate);
+       // console.log('completeDate', completeDate);
+       // console.log('acceptedDate', acceptedDate);
 
         return moment.duration(completeDate.diff(acceptedDate)).as('days');
     }

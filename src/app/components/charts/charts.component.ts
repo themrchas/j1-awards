@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 //import { DataService } from './../../services/data.service';
 import { DataProviderService } from './../../services/data-provider.service';
 
-import {Award} from './../../model/award';
+import { Award } from './../../model/award';
 
 @Component({
   selector: 'app-charts',

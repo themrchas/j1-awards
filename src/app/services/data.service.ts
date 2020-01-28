@@ -183,10 +183,14 @@ export class DataService {
   //Return the processed award breakdown constructed as each award was being analyzed in the Award class
   public getAwardBreakdown() : any  {
 
+    
+    Award.fillAwardBreakDown(this.unitsList,this.awardTypesList);
+
     return Award.getAwardBreakdown();
-    //return 'blah';
+    
   }
 
+  
   
 
 

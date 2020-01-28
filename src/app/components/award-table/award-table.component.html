@@ -1,18 +1,17 @@
-<h2>Awards are {{ awards }}</h2>
 
-
-<table mdbTable>
+<table class="table">
   <thead>
     <tr>
-      <th>MDB TableHeader</th>
+      <th *ngFor="let unit of unitsList">{{unit}}</th>
     </tr>
   </thead>
   <tbody>
-    <tr mdbTableCol>
-      <th scope="row">1</th>
-      <td>Beavis</td>
-      <td>Butthead</td>
-      <td>Mr. Anderson</td>
+    <tr mdbTableCol *ngFor="let award of awardTypes">
+      <th scope="row">{{award}}</th>
+     <!-- <td *ngFor="let unit of unitList">{{award}}-{{unit}}</td> -->
+     <td *ngFor="let unit of unitsList">{{awardBreakDown[unit][award]}}</td>
     </tr>
   </tbody>
-</table>
+</table> 
+
+<!-- <h2>Yes - money!</h2> -->

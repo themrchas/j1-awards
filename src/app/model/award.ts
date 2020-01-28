@@ -136,5 +136,25 @@ export class Award {
            return Award.awardBreakDown;
       }
 
+      public static fillAwardBreakDown(units:Array<string>,awards:Array<string>) {
+
+        console.log('in fillAwardBreakDown');
+
+        units.forEach(function(unit) {
+
+            Award.awardBreakDown[unit] = Award.awardBreakDown[unit] || {};
+
+         //   if (!Award.awardBreakDown[unit])
+            //    Award.awardBreakDown[unit] = {};
+
+            awards.forEach(function(award) {
+
+              //  if (!Award.awardBreakDown[unit][award])
+              Award.awardBreakDown[unit][award] = Award.awardBreakDown[unit][award] || 0;
+            })
+
+        })
+      }
+
 
 }

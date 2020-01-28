@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
-import { MDBBootstrapModule } from 'angular-bootstrap-md';
+//import { MDBBootstrapModule } from 'angular-bootstrap-md';
 
 import { AppComponent } from './app.component';
 
@@ -22,8 +22,8 @@ export function dataProviderFactory(provider: DataProviderService) {
   ],
   imports: [
     BrowserModule,
-    HttpClientModule,
-    MDBBootstrapModule.forRoot()
+    HttpClientModule
+   // MDBBootstrapModule.forRoot()
   ],
   providers: [
     DataProviderService, 

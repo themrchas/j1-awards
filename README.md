@@ -1,4 +1,4 @@
-# J1Charts
+# J1C Awards
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.3.0.
 

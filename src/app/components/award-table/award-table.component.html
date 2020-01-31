@@ -1,7 +1,8 @@
 
-<table class="table">
+<table mdbTable>
   <thead>
-    <tr>
+    <tr style="background-color: #c9feff;">
+      <th>Type/Unit</th>
       <th *ngFor="let unit of unitsList">{{unit}}</th>
     </tr>
   </thead>
@@ -10,6 +11,12 @@
       <th scope="row">{{award}}</th>
      <!-- <td *ngFor="let unit of unitList">{{award}}-{{unit}}</td> -->
      <td *ngFor="let unit of unitsList">{{awardBreakDown[unit][award]}}</td>
+     <td>{{calculateAwardTotalRow(award)}}</td>
+    </tr>
+    <tr>
+      <td>Total</td>
+      <td *ngFor="let unit of unitsList">{{calculateAwardTotalCol(unit)}}</td>
+      <td>{{totalAwards}}</td>
     </tr>
   </tbody>
 </table> 

@@ -4,6 +4,7 @@ import * as moment from 'moment';
 export class Award {
 
     private static awardBreakDown: any = {};
+    private static totalAwards: number = 0;
 
     private _awardNumber: string;
     private _awardType: string;
@@ -94,6 +95,7 @@ export class Award {
 
      //   console.log('categorizeAward:finish')
 
+        Award.totalAwards++;
 
     }
 
@@ -132,9 +134,15 @@ export class Award {
     
     }
 
-      public static getAwardBreakdown(): any {
+     
+
+      public static getAwardBreakdown(): Object {
            return Award.awardBreakDown;
       }
+
+      public static getTotalAwards(): number {
+        return Award.totalAwards;
+      } 
 
       public static fillAwardBreakDown(units:Array<string>,awards:Array<string>) {
 

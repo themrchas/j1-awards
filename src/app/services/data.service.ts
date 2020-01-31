@@ -7,6 +7,7 @@ import { SpService } from "./sp.service";
 import {Award} from './../model/award';
 
 import * as _  from 'lodash';
+import * as moment from 'moment';
 
 @Injectable({
   providedIn: 'root'
@@ -52,7 +53,10 @@ export class DataService {
 
  getInitialAwardData() : Observable<any> {
 
-   return forkJoin([this.getData(), this.getAwardMatrixHeaderInfo()])
+  const currentYear = moment().year();
+  const defaultInitialDate = currentYear+"-01-13T00:00:00Z";
+
+   return forkJoin([this.getData(defaultInitialDate,"2020-01-16T00:00:00Z"), this.getAwardMatrixHeaderInfo()])
 
   }
 
@@ -76,9 +80,9 @@ export class DataService {
 
   
 
-  getData(): Observable<any> {
+  getData(startDate: string, endDate?:string): Observable<any> {
     console.log('data.service: Executing getData');
-    return this.spService.getData()
+    return this.spService.getData(startDate,endDate)
       .pipe(
    //     tap(val => console.log('dataService: tap: spService.getData call returned', val)),
           map(el =>  this._parseAwardJson(el) )
@@ -189,6 +193,12 @@ export class DataService {
     return Award.getAwardBreakdown();
     
   }
+
+  public getTotalAwards(): number {
+    return Award.getTotalAwards();
+  }
+
+  
 
   
   

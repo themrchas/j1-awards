@@ -30,7 +30,7 @@ export class DataProviderService {
           tap(val => console.log('tapped data is',val) ),
          concatMap(data => this.dataService.analyzeAwardData() ))
           .subscribe(final => { 
-                console.log('******conacate map provided',final);
+                console.log('******conacat map provided',final);
                 resolve(true) 
           });
         

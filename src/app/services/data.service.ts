@@ -19,7 +19,14 @@ export class DataService {
   
   private _awardTypesList: Array<string>;
   private _unitsList:  Array<string>;
+
+  //List of all awards that have been read in and saved as Award object
+  private processedAwardsList: Array<Award>; //= new Array<Award>() ;
+
+  //The complete cartesian product of awards x units filled out.  
   private _awardBreakDown: any;
+
+  
 
   get awardTypesList() {
     return this._awardTypesList;
@@ -40,7 +47,7 @@ export class DataService {
   get awardBreakDown() {
     return this._awardBreakDown;
   }
-
+  
   set awardBreakDown(value:any) {
     this._awardBreakDown = value;
   }
@@ -56,18 +63,69 @@ export class DataService {
   const currentYear = moment().year();
   const defaultInitialDate = currentYear+"-01-13T00:00:00Z";
 
-   return forkJoin([this.getData(defaultInitialDate,"2020-01-16T00:00:00Z"), this.getAwardMatrixHeaderInfo()])
-
+  // return forkJoin([this.getData(defaultInitialDate,"2020-01-16T00:00:00Z"), this.getAwardMatrixHeaderInfo()])
+  return forkJoin([this.getData(defaultInitialDate), this.getAwardMatrixHeaderInfo()])
   }
 
 
  analyzeAwardData(): Observable<any> {
 
+  
+
+  let awardBreakDown: any = {};
+
     //console.log('*******data.service.analyzeAwardData can access awards object',this.awardBreakDown);
+    console.log('raw data list after initial processing is', this.processedAwardsList);
+
+    this.processedAwardsList.forEach(function(processedAward) {
+
+      let award: string = (processedAward.awardSubType !== null) ? processedAward.awardSubType : processedAward.awardType;
+
+      //Set the submitting unit
+      let unit: string = (processedAward.subOrganization !== null) ? processedAward.subOrganization : processedAward.organization;
+
+      //Create entry if either award type or award type + unit does not exit
+      if (!awardBreakDown[unit]) {
+          awardBreakDown[unit] = {};
+          awardBreakDown[unit][award] = 1;
+      }
+      else if (!awardBreakDown[unit][award])
+          awardBreakDown[unit][award] = 1;
+      else
+          awardBreakDown[unit][award] =  awardBreakDown[unit][award] + 1;
+
+
+   
+    //  Award.totalAwards++;
+
+  });
+
+console.log('analyzeAwardData: awardBreakDown is',awardBreakDown)
+console.log('3awardTypesList is',this.awardTypesList);
+
+let awardTypesList = this.awardTypesList;
+
+//Any member of the cartesian product units x award types that is blank gets a 0
+this.unitsList.forEach(function(unit) {
+
+  awardBreakDown[unit] = awardBreakDown[unit] || {};
+
+
+
+  awardTypesList.forEach(function(award) {
+
+    //  if (!Award.awardBreakDown[unit][award])
+    awardBreakDown[unit][award] = awardBreakDown[unit][award] || 0;
+  })
+
+})
+
+this.awardBreakDown = awardBreakDown;
 
   return Observable.create(observer => {
    // observer.next('analyzeAward just emitted an an bservable')
-   observer.next(Award.getAwardBreakdown())
+  // observer.next(Award.getAwardBreakdown())
+  observer.next(awardBreakDown)
     
     }) //.pipe(val => return '*****yes - money')
      
@@ -75,7 +133,7 @@ export class DataService {
       
 
 
-  } 
+  }  //analyzeAwardData
 
 
   
@@ -85,7 +143,7 @@ export class DataService {
     return this.spService.getData(startDate,endDate)
       .pipe(
    //     tap(val => console.log('dataService: tap: spService.getData call returned', val)),
-          map(el =>  this._parseAwardJson(el) )
+          map(el =>  this._parseAwardJson(el) )  //Can we return an empty value?????????????
        //  map(el => { return this._parseAwardJson(el) } ),
        //     tap(el => console.log('dataService.getData: mapped data in getData is',el))
       )
@@ -93,6 +151,7 @@ export class DataService {
 
   }
 
+  
   //Grab the matrix headers
   private getAwardMatrixHeaderInfo():  Observable<any> {
     console.log('data.service: Executing getMatrixHeaders');
@@ -107,6 +166,9 @@ export class DataService {
 
   }
 
+
+
+
    
  //Return a new Award object from each award retreived from data pull
   private _parseAwardJson(awards: any) {
@@ -119,7 +181,13 @@ export class DataService {
     //  console.log('_parseAwardJson:el is',awards);
     console.log('dataService: processed awards is', processed);
 
-    
+  //  if (!this.processedAwardsList)  
+   //     this.processedAwardsList = [].push(processed);
+  //  else
+     // this.processedAwardsList.push(processed)
+     this.processedAwardsList = processed;
+
+
     return processed;
 
   }
@@ -185,17 +253,18 @@ export class DataService {
   } 
 
   //Return the processed award breakdown constructed as each award was being analyzed in the Award class
-  public getAwardBreakdown() : any  {
+  /*public getAwardBreakdown() : any  {
 
     
     Award.fillAwardBreakDown(this.unitsList,this.awardTypesList);
 
     return Award.getAwardBreakdown();
     
-  }
+  } */
 
   public getTotalAwards(): number {
-    return Award.getTotalAwards();
+  //  return Award.getTotalAwards();
+  return 1;
   }
 
   

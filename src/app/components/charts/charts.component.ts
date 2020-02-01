@@ -22,7 +22,7 @@ export class ChartsComponent implements OnInit {
 
   ngOnInit() {
 
-    this.awardBreakdown = this.dataService.getAwardBreakdown();
+    this.awardBreakdown = this.dataService.awardBreakDown;
     this.unitsList  = this.dataService.unitsList;
     this.awardTypes = this.dataService.awardTypesList;
 

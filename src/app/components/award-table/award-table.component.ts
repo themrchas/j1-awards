@@ -22,7 +22,7 @@ export class AwardTableComponent implements OnInit {
 
   ngOnInit() {
 
-    this.awardBreakDown = this.dataService.getAwardBreakdown();
+    this.awardBreakDown = this.dataService.awardBreakDown;
     this.totalAwards = this.dataService.getTotalAwards();
         
 

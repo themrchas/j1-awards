@@ -16,7 +16,7 @@ export class SpService implements OnInit {
  // const restEndPoint: String = environment.listWeb.
  // restEndPoint:string = "http://localhost:8080/sites/dev/socafdev";
  //restEndPoint:string = "http://sp-dev-sharepoi/sites/dev/socafdev/_api/web/lists/getbytitle('AwardsMetrics')/items(1)";
- awardListRestEndPointBase:string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('AwardsMetrics')/items";
+ awardListRestEndPointBase:string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('Award Metrics')/items";
 
  awardMatrixListRestEndPoint: string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('Awards Matrix Slide')/items";
  

@@ -5,6 +5,8 @@ export class Award {
 
     private static awardBreakDown: any = {};
     private static totalAwards: number = 0;
+    
+    
 
     private _awardNumber: string;
     private _awardType: string;
@@ -55,49 +57,29 @@ export class Award {
         this._dateToHRC = rawAward.DateToHRC || null;
         this._dateToSOCOM = rawAward.dateToSOCOM || null;
 
-        this.categorizeAward(this._organization,this._awardType,this._subordinateUnit,this._awardSubType)
+     //   this.categorizeAward(this._organization,this._awardType,this._subordinateUnit,this._awardSubType)
 
 
         
     }
 
-    private categorizeAward(organization: string,  awardType: string, subOrg?: string, awardSubtype?: string ) {
+     get awardType() {
+         return this._awardType;
+     }
 
-      //  let regex: RegExp   = /^(\S+)-\d/;
+     get awardSubType() {
+         return this._awardSubType;
+     }
 
-    //  console.log('categorizeAward: start');
+     get organization() {
+         return this._organization;
+     }
 
+     get subOrganization() {
+         return this._subordinateUnit;
+     }
 
-        //Set the award type
-        let award: string = (awardSubtype !== null) ? awardSubtype : awardType;
-
-        //Set the submitting unit
-        let unit: string = (subOrg !== null) ? subOrg : organization;
-
-        //Create entry if either award type or award type + unit does not exit
-        if (!Award.awardBreakDown[unit]) {
-            Award.awardBreakDown[unit] = {};
-            Award.awardBreakDown[unit][award] = 1;
-        }
-        else if (!Award.awardBreakDown[unit][award])
-            Award.awardBreakDown[unit][award] = 1;
-        else
-            Award.awardBreakDown[unit][award] =  Award.awardBreakDown[unit][award] + 1;
-
-
-      /*  if (!Award.awardBreakDown[unit] || !Award.awardBreakDown[unit][award]) {
-          
-          Award.awardBreakDown[unit] = {};
-          Award.awardBreakDown[unit][award] = 1;
-        }
-        else 
-            Award.awardBreakDown[unit][award] =  Award.awardBreakDown[unit][award] + 1; */
-
-     //   console.log('categorizeAward:finish')
-
-        Award.totalAwards++;
-
-    }
+   
 
     getData(): string {
         return this._awardNumber+"  "+this._dateAccepted;
@@ -136,33 +118,9 @@ export class Award {
 
      
 
-      public static getAwardBreakdown(): Object {
-           return Award.awardBreakDown;
-      }
+     
 
-      public static getTotalAwards(): number {
-        return Award.totalAwards;
-      } 
-
-      public static fillAwardBreakDown(units:Array<string>,awards:Array<string>) {
-
-        console.log('in fillAwardBreakDown');
-
-        units.forEach(function(unit) {
-
-            Award.awardBreakDown[unit] = Award.awardBreakDown[unit] || {};
-
-         //   if (!Award.awardBreakDown[unit])
-            //    Award.awardBreakDown[unit] = {};
-
-            awards.forEach(function(award) {
-
-              //  if (!Award.awardBreakDown[unit][award])
-              Award.awardBreakDown[unit][award] = Award.awardBreakDown[unit][award] || 0;
-            })
-
-        })
-      }
+      
 
 
 }

@@ -16,7 +16,10 @@ export class SpService implements OnInit {
  // const restEndPoint: String = environment.listWeb.
  // restEndPoint:string = "http://localhost:8080/sites/dev/socafdev";
  //restEndPoint:string = "http://sp-dev-sharepoi/sites/dev/socafdev/_api/web/lists/getbytitle('AwardsMetrics')/items(1)";
- awardListRestEndPointBase:string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('Award Metrics')/items";
+
+
+ //awardListRestEndPointBase:string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('Award Metrics')/items";
+ awardListRestEndPointBase:string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('AwardsMetrics')/items";
 
  awardMatrixListRestEndPoint: string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('Awards Matrix Slide')/items";
  
@@ -29,11 +32,49 @@ export class SpService implements OnInit {
   // this.httpHeaders = new HttpHeaders().set('Accept','application/json; odata=verbose');
   }
 
+
+  //Data that will appear in the matrix as well as the categorization that lies to the 'left' of the matrix
+  //We are looking for any awards that have completed in the current physical year - 'DateComplete ge startDate'
+  //as well as data in various stages of the awards business process that are currently active
+  getData(startDate: string,endDate?: string):Observable<any> {
+
+    let filter: string // "?$filter=DateComplete ge datetime'"+startDate+"'";
+
+    //Filter strings to get data that will show up to the 'left' of the matrix -> awards currently being processed
+    let awardStatusesOfInterest  = [];
+    awardStatusesOfInterest.push("startswith(AwardStatus,'Pending Review') or startswith(AwardStatus,'Accept for')");
+    awardStatusesOfInterest.push("or (AwardStatus eq 'J1 QC Review') or (AwardStatus eq 'SJS QC Review') or (AwardStatus eq 'Ready for Boarding') or startswith(AwardStatus,'Board Member ')");
+    awardStatusesOfInterest.push("or (AwardStatus eq 'Pending CG Signature' ) or (AwardStatus eq 'Boarding Complete') or (AwardStatus eq 'With HRC') or (AwardStatus eq 'With SOCOM')");
+
+   filter = "?$filter=("+awardStatusesOfInterest.join(" ")+"or (DateComplete ge datetime'"+startDate+"'))";
+   //filter = "?$filter=("+awardStatusesOfInterest.join(" ")+")";
+    
+    
+
+
+    const restEndPoint=this.awardListRestEndPointBase+filter;
+
+    console.log('sp.service:restEndPoint - endpoint to query is',restEndPoint);
+
+  
+
+     console.log('sp.service.getMatrixData: Executing httpClient with endpoint',this.awardListRestEndPointBase,'and header',this.httpHeaders);
+  return this.httpClient.get(restEndPoint, {headers: this.httpHeaders})
+  //  .pipe (
+     //       tap(val => console.log('sp.service.getData tap: Http call returned', val))
+         //  map(el =>  this._parseAwardJson(el) ),
+      //   map(el => { return this._parseAwardJson(el)} ),
+       //     tap(el => console.log('mapped data in getData is',el))
+        //  )
+
+  
+}
+
   
   
 
   //private getData(restEndPoint:String, restHeaders:String):Observable<any> {
-     getData(startDate: string, endDate?: string):Observable<any> {
+     getData1(startDate: string, endDate?: string):Observable<any> {
 
       let filter: string; 
 

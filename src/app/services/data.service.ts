@@ -4,6 +4,8 @@ import { Observable , forkJoin,  of, from } from 'rxjs';
 import { Injectable, OnInit } from '@angular/core';
 import { SpService } from "./sp.service";
 
+import { TimeService } from "./time.service";
+
 import {Award} from './../model/award';
 
 import * as _  from 'lodash';
@@ -16,17 +18,28 @@ import * as moment from 'moment';
 //A middleware class that bridges the SharePoint specific calls and components that require SharePoint data that has been organized in some logical fashion
 export class DataService {
 
-  
+
   private _awardTypesList: Array<string>;
   private _unitsList:  Array<string>;
 
-  //List of all awards that have been read in and saved as Award object
-  private processedAwardsList: Array<Award>; //= new Array<Award>() ;
+  //List of all awards that have been read in and saved as Award object which have a complete date of this year.
+  //This data is used for the matrix numbers as well as the data for awards in various stages of progress.
+   private _awardsForMatrix: Array<Award>; 
 
+   
   //The complete cartesian product of awards x units filled out.  
   private _awardBreakDown: any;
 
-  
+
+  //Contains a breakdown of awards that are currently in some step of processing and are not counted in the matrix stats.
+  //This info is categorized as 'New Submissions', 'J1QC', 'Ready for Boarding', etc.
+  private _awardsInProcessing: Object = {};
+
+
+  //Object consiting of order as key and properties { monthYear:  "Jan 2001", completeCount:5}
+  private _completionTimesByMonth: Object;
+
+ 
 
   get awardTypesList() {
     return this._awardTypesList;
@@ -44,17 +57,30 @@ export class DataService {
     this._unitsList = value;
   }
 
+  //The breakdown of awards for current year
   get awardBreakDown() {
     return this._awardBreakDown;
   }
   
+  //The breakdown of awards for current year
   set awardBreakDown(value:any) {
     this._awardBreakDown = value;
   }
-  
+
+  get completionTimesByMonth() : Object {
+    return this._completionTimesByMonth;
+  }
+
+  get awardsInProcessing() : Object {
+    return this._awardsInProcessing;
+  }
+
+  set awardsInProcessing(value:Object) {
+   this._awardsInProcessing =value;
+  }
 
 
-  constructor(private spService: SpService) { }
+  constructor(private spService: SpService, private timeService: TimeService) { }
 
 
 
@@ -63,21 +89,30 @@ export class DataService {
   const currentYear = moment().year();
   const defaultInitialDate = currentYear+"-01-13T00:00:00Z";
 
-  // return forkJoin([this.getData(defaultInitialDate,"2020-01-16T00:00:00Z"), this.getAwardMatrixHeaderInfo()])
-  return forkJoin([this.getData(defaultInitialDate), this.getAwardMatrixHeaderInfo()])
+  let test = this.timeService.createTimeRange(defaultInitialDate);
+
+  console.log('array of timres is ',test);
+
+   return forkJoin([this.getData(defaultInitialDate,"2020-01-16T00:00:00Z"), this.getAwardMatrixHeaderInfo()])
+ // return forkJoin([this.getData(defaultInitialDate), this.getAwardMatrixHeaderInfo()])
   }
 
 
+/*
+ Creates a logical matrix of award counts, most importantly assigning '0' to any unit/award combinations not 
+  found in the data pull.
+*/
  analyzeAwardData(): Observable<any> {
-
-  
 
   let awardBreakDown: any = {};
 
     //console.log('*******data.service.analyzeAwardData can access awards object',this.awardBreakDown);
-    console.log('raw data list after initial processing is', this.processedAwardsList);
+    console.log('raw data list after initial processing is', this._awardsForMatrix);
 
-    this.processedAwardsList.forEach(function(processedAward) {
+    //Grab data identified as to be used in the matrix 
+    this._awardsForMatrix.filter(award => award.useInMatrix ).
+        forEach(function(processedAward) {
+  //  this._awardsForMatrix.forEach(function(processedAward) {
 
       let award: string = (processedAward.awardSubType !== null) ? processedAward.awardSubType : processedAward.awardType;
 
@@ -120,24 +155,48 @@ this.unitsList.forEach(function(unit) {
 
 })
 
-this.awardBreakDown = awardBreakDown;
+//let awardsInProcessing = {};
+ //Collate according to in processing type.  Non of these awards are used in tmatrix calculations since they are still 'in progress'
+this._awardsForMatrix.filter(award => !award.useInMatrix ).
+      //  forEach(function(processedAward) {
+        forEach(processedAward => {
+
+          //Collate according to in processing type
+          this.awardsInProcessing[processedAward.awardState] = (this.awardsInProcessing[processedAward.awardState]) ? this.awardsInProcessing[processedAward.awardState]++ : 1
+
+        });
+
+  //      this.awardsInProcessing = awardsInProcessing
+  this.awardBreakDown = awardBreakDown;
+  console.log('award currently being processed',  this.awardsInProcessing);
+
+
+
 
   return Observable.create(observer => {
    // observer.next('analyzeAward just emitted an an bservable')
   // observer.next(Award.getAwardBreakdown())
   observer.next(awardBreakDown)
     
-    }) //.pipe(val => return '*****yes - money')
-     
+    })    
  
-      
-
-
   }  //analyzeAwardData
 
 
-  
+  //Grabs data that will be used in the matrix
+  getMatrixData(startDate: string): Observable<any> {
+    console.log('data.service: Executing getData');
+    return this.spService.getData(startDate)
+      .pipe(
+   //     tap(val => console.log('dataService: tap: spService.getData call returned', val)),
+          map(el =>  this._parseAwardJson(el) )  //Can we return an empty value?????????????
+       //  map(el => { return this._parseAwardJson(el) } ),
+       //     tap(el => console.log('dataService.getData: mapped data in getData is',el))
+      )
+  }
 
+  
+ //Get award data from SharePoint list
   getData(startDate: string, endDate?:string): Observable<any> {
     console.log('data.service: Executing getData');
     return this.spService.getData(startDate,endDate)
@@ -152,7 +211,7 @@ this.awardBreakDown = awardBreakDown;
   }
 
   
-  //Grab the matrix headers
+  //Grab the matrix headers from SharePoint list
   private getAwardMatrixHeaderInfo():  Observable<any> {
     console.log('data.service: Executing getMatrixHeaders');
     return this.spService.getMatrixHeaders()
@@ -185,7 +244,9 @@ this.awardBreakDown = awardBreakDown;
    //     this.processedAwardsList = [].push(processed);
   //  else
      // this.processedAwardsList.push(processed)
-     this.processedAwardsList = processed;
+
+     
+     this._awardsForMatrix = processed;
 
 
     return processed;
@@ -209,11 +270,7 @@ this.awardBreakDown = awardBreakDown;
     //Award breakdown stats { 'unit' { awardType1: 0, awardType2: 4}}
     let awardBreakDown: any;
 
-    //Grab all units and create object keyed by unit
-    // rawUnitData = _.chain(headers.d.results).filter(['isUnit',true]).keyBy('Unit').value();
-    //console.log('rawUnitData is',rawUnitData);
-
-
+    
     //Create lists consisting or ordered units and awards, respectively  
     awardTypesList = _.chain(headers.d.results).filter(['isUnit', false]).sortBy('[AwardOrder]')
       .map('AwardType').value();
@@ -252,20 +309,14 @@ this.awardBreakDown = awardBreakDown;
 
   } 
 
-  //Return the processed award breakdown constructed as each award was being analyzed in the Award class
-  /*public getAwardBreakdown() : any  {
-
-    
-    Award.fillAwardBreakDown(this.unitsList,this.awardTypesList);
-
-    return Award.getAwardBreakdown();
-    
-  } */
+  
 
   public getTotalAwards(): number {
   //  return Award.getTotalAwards();
   return 1;
   }
+
+
 
   
 

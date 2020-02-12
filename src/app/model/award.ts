@@ -3,10 +3,7 @@ import * as moment from 'moment';
 
 export class Award {
 
-   // private static awardBreakDown: any = {};
-  //  private static totalAwards: number = 0;
-    
-    
+  
 
     private _awardNumber: string;
     private _awardType: string;
@@ -40,6 +37,14 @@ export class Award {
     //True if the award was completed in current year and completed date is not null
     private _useInMatrix: boolean;
 
+    //True if award has been completed in the past 12 months (default) and has a valid DateAccepted amd DateComplete.  These two items 
+    //are required to calculate a 'days taken to process' metric
+    private _useInChartComplete: boolean;
+
+    //True if the award is complete in the past 12 months (default) and has a valid DateSentToBoarding, DateCompleteBoarding, and DateComplete timestamp
+    private _useInBoardingTimeChart: boolean;
+
+    
     constructor(rawAward: any) {
 
         let currentYear = moment().format("YYYY")
@@ -65,9 +70,17 @@ export class Award {
         this._dateToHRC = rawAward.DateToHRC || null;
         this._dateToSOCOM = rawAward.dateToSOCOM || null;
 
-
         //Award was completed in the current year and date completed has a value
         this._useInMatrix = ( rawAward.DateComplete ) && ( moment().format("YYYY") == moment(rawAward.DateComplete).format("YYYY") );
+
+        //This award is to be used in the Complete Awards chart if has a valid complete and accepted date and completion date is less than/equal to a year old
+        this._useInChartComplete = ( this._dateAwardComplete ) && (this._dateAccepted) && 
+            ( moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
+
+        //This award to be used in the Boarding Time chart if time difference between completed award date and now is less than a year
+        this._useInBoardingTimeChart = ( this._dateAwardComplete ) && (this._dateStartBoarding) && ( this._dateCompleteBoarding) &&
+            ( moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
+
 
         //If the award is not complete, then that means that it is currently in some state of the awards process per the data pull filter
         //Need to verify 'CMD GRP', 'J1 Final Stages', and 'Mailed this week'
@@ -79,7 +92,7 @@ export class Award {
                 case  'Pending Review (Resubmit)':
                 case  'Accept for Action':
                 case  'Accept for Action - Resubmit':
-                    this._awardState = 'New Submission';
+                    this._awardState = 'New Submissions';
                     break;
                 
                 case 'J1 QC Review':
@@ -129,6 +142,18 @@ export class Award {
 
      get awardStatus() {
          return this._awardStatus;
+     }
+
+     get completionDate() {
+         return this._dateAwardComplete;
+     }
+
+     get useInChartComplete() {
+         return this._useInChartComplete
+     }
+
+     get useInBoardingTimeChart() {
+         return this._useInBoardingTimeChart;
      }
   
 

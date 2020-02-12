@@ -9,6 +9,8 @@ import { ChartsComponent } from './components/charts/charts.component';
 import { AwardTableComponent } from './components/award-table/award-table.component';
 import { DataProviderService } from './../app/services/data-provider.service';
 
+import { InProgressComponent } from './components/in-progress/in-progress.component';
+
 export function dataProviderFactory(provider: DataProviderService) {
   return () => provider.load();
 }
@@ -17,7 +19,8 @@ export function dataProviderFactory(provider: DataProviderService) {
   declarations: [
     AppComponent,
     ChartsComponent,
-    AwardTableComponent
+    AwardTableComponent,
+    InProgressComponent
     
   ],
   imports: [

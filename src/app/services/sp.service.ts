@@ -34,9 +34,11 @@ export class SpService implements OnInit {
 
 
   //Data that will appear in the matrix as well as the categorization that lies to the 'left' of the matrix
-  //We are looking for any awards that have completed in the current physical year - 'DateComplete ge startDate'
+  //We are looking for any awards that have completed in the past 12 months - 'DateComplete ge startDate'
   //as well as data in various stages of the awards business process that are currently active
   getData(startDate: string,endDate?: string):Observable<any> {
+
+    console.log('sp.service: startDate', startDate, 'end date', endDate);
 
     let filter: string // "?$filter=DateComplete ge datetime'"+startDate+"'";
 
@@ -46,8 +48,8 @@ export class SpService implements OnInit {
     awardStatusesOfInterest.push("or (AwardStatus eq 'J1 QC Review') or (AwardStatus eq 'SJS QC Review') or (AwardStatus eq 'Ready for Boarding') or startswith(AwardStatus,'Board Member ')");
     awardStatusesOfInterest.push("or (AwardStatus eq 'Pending CG Signature' ) or (AwardStatus eq 'Boarding Complete') or (AwardStatus eq 'With HRC') or (AwardStatus eq 'With SOCOM')");
 
-   filter = "?$filter=("+awardStatusesOfInterest.join(" ")+"or (DateComplete ge datetime'"+startDate+"'))";
-   //filter = "?$filter=("+awardStatusesOfInterest.join(" ")+")";
+  // filter = "?$filter=("+awardStatusesOfInterest.join(" ")+"or (DateComplete ge datetime'"+startDate+"'))";
+  filter = "?$filter=("+awardStatusesOfInterest.join(" ")+"or ( (DateComplete ge datetime'"+startDate+"') and (DateComplete le datetime'"+endDate+"')))";
     
     
 
@@ -71,37 +73,7 @@ export class SpService implements OnInit {
 }
 
   
-  
-
-  //private getData(restEndPoint:String, restHeaders:String):Observable<any> {
-     getData1(startDate: string, endDate?: string):Observable<any> {
-
-      let filter: string; 
-
-      if (!endDate) 
-        filter = "?$filter=Created ge datetime'"+startDate+"'";
-      else
-        filter = "?$filter=( Created ge datetime'"+startDate+"' ) and ( Created le datetime'"+endDate+"' )";
-
-      
-
-      const restEndPoint=this.awardListRestEndPointBase+filter;
-
-      console.log('endpoint to query is',restEndPoint);
-
-    
-
-       console.log('sp.service.getData: Executing httpClient with endpoint',this.awardListRestEndPointBase,'and header',this.httpHeaders);
-    return this.httpClient.get(restEndPoint, {headers: this.httpHeaders})
-      .pipe (
-              tap(val => console.log('sp.service.getData tap: Http call returned', val))
-           //  map(el =>  this._parseAwardJson(el) ),
-        //   map(el => { return this._parseAwardJson(el)} ),
-         //     tap(el => console.log('mapped data in getData is',el))
-            )
-
-    
-  }
+ 
 
   getMatrixHeaders():Observable<any> {
 

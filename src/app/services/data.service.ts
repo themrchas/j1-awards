@@ -18,26 +18,35 @@ import * as moment from 'moment';
 //A middleware class that bridges the SharePoint specific calls and components that require SharePoint data that has been organized in some logical fashion
 export class DataService {
 
-
   private _awardTypesList: Array<string>;
   private _unitsList:  Array<string>;
 
-  //List of all awards that have been read in and saved as Award object which have a complete date of this year.
+  //List of all awards that have been read in and saved as Award object which have a complete date of the past 12 months.
   //This data is used for the matrix numbers as well as the data for awards in various stages of progress.
+  //This data is also used for the completion date and boarding 12 month lookback graphs.
    private _awardsForMatrix: Array<Award>; 
 
    
-  //The complete cartesian product of awards x units filled out.  
+  //The complete cartesian product of awards x units filled out with counts.  
   private _awardBreakDown: any;
-
 
   //Contains a breakdown of awards that are currently in some step of processing and are not counted in the matrix stats.
   //This info is categorized as 'New Submissions', 'J1QC', 'Ready for Boarding', etc.
   private _awardsInProcessing: Object = {};
+  
+
+  //Object consiting of order as key and properties  { "Jan 2001": { completeCount:5, completionDays:4 } }
+  private _completionTimesByMonth: Object ={};
+
+  //Object consiting of order as key and properties  { "Jan 2001": { completeCount:5, completionDays:4 } }
+  private _boardingCcompletionTimesByMonth: Object ={};
+  
+  //Array consiting of entries of "Jan 2001" - "MMM YYYY"
+  private _monthGrid: Array<string>;
 
 
-  //Object consiting of order as key and properties { monthYear:  "Jan 2001", completeCount:5}
-  private _completionTimesByMonth: Object;
+  //Categories for awards that are not complete and in some state of processing
+  private _inProgressTypes = ["New Submissions", "J1QC", "Ready for Boarding","Board Members","CMD GRP","J1 Final Stages","Total"]
 
  
 
@@ -71,12 +80,36 @@ export class DataService {
     return this._completionTimesByMonth;
   }
 
+  set completionTimesByMonth(value: Object) {
+    this._completionTimesByMonth = value;
+  }
+
+  get boardingCompletionTimesByMonth() : Object {
+    return this._completionTimesByMonth;
+  }
+
+  set boardingCompletionTimesByMonth(value: Object) {
+    this._completionTimesByMonth = value;
+  }
+
+  set monthGrid(value: Array<string>) {
+    this._monthGrid = value;
+  }
+
+  get monthGrid() : Array<string> {
+    return this._monthGrid;
+  }
+
   get awardsInProcessing() : Object {
     return this._awardsInProcessing;
   }
 
   set awardsInProcessing(value:Object) {
-   this._awardsInProcessing =value;
+   this._awardsInProcessing = value;
+  }
+
+  get inProgressTypes() {
+    return this._inProgressTypes;
   }
 
 
@@ -86,14 +119,18 @@ export class DataService {
 
  getInitialAwardData() : Observable<any> {
 
-  const currentYear = moment().year();
-  const defaultInitialDate = currentYear+"-01-13T00:00:00Z";
+  const defaultInitialDate = moment();
 
-  let test = this.timeService.createTimeRange(defaultInitialDate);
+  this.monthGrid = this.timeService.createTimeRange(defaultInitialDate);
+  
 
-  console.log('array of timres is ',test);
+ // let test = this.timeService.createTimeRange(defaultInitialDate);
 
-   return forkJoin([this.getData(defaultInitialDate,"2020-01-16T00:00:00Z"), this.getAwardMatrixHeaderInfo()])
+ // console.log('array of times is ',test);
+
+
+  return forkJoin([this.getData(this.timeService.subtractYearFromDate(defaultInitialDate.format('YYYY-MM-DD')),defaultInitialDate.toISOString()), this.getAwardMatrixHeaderInfo()])
+  // return forkJoin([this.getData(defaultInitialDate,"2020-01-16T00:00:00Z"), this.getAwardMatrixHeaderInfo()])
  // return forkJoin([this.getData(defaultInitialDate), this.getAwardMatrixHeaderInfo()])
   }
 
@@ -138,16 +175,18 @@ export class DataService {
 console.log('analyzeAwardData: awardBreakDown is',awardBreakDown)
 console.log('3awardTypesList is',this.awardTypesList);
 
-let awardTypesList = this.awardTypesList;
+//let awardTypesList = this.awardTypesList;
 
 //Any member of the cartesian product units x award types that is blank gets a 0
-this.unitsList.forEach(function(unit) {
+//this.unitsList.forEach(function(unit) {
+  this.unitsList.forEach(unit => {
 
   awardBreakDown[unit] = awardBreakDown[unit] || {};
 
 
+  this.awardTypesList.forEach(award =>  {
+ // awardTypesList.forEach(function(award) {
 
-  awardTypesList.forEach(function(award) {
 
     //  if (!Award.awardBreakDown[unit][award])
     awardBreakDown[unit][award] = awardBreakDown[unit][award] || 0;
@@ -155,23 +194,34 @@ this.unitsList.forEach(function(unit) {
 
 })
 
+
+//Initial count of various in-progress award states  'New Submissions', 'J1QC', etc.
+this.inProgressTypes.forEach(awardState => {
+  this.awardsInProcessing[awardState] = 0;
+   
+})
+
 //let awardsInProcessing = {};
- //Collate according to in processing type.  Non of these awards are used in tmatrix calculations since they are still 'in progress'
+ //Collate according to in processing type.  Non of these awards are used in the matrix calculations since they are still 'in progress'
 this._awardsForMatrix.filter(award => !award.useInMatrix ).
       //  forEach(function(processedAward) {
         forEach(processedAward => {
 
-          //Collate according to in processing type
-          this.awardsInProcessing[processedAward.awardState] = (this.awardsInProcessing[processedAward.awardState]) ? this.awardsInProcessing[processedAward.awardState]++ : 1
-
+          //Collate according to in-processing type
+          //this.awardsInProcessing[processedAward.awardState] = (this.awardsInProcessing[processedAward.awardState]) ? this.awardsInProcessing[processedAward.awardState]++ : 1
+          this.awardsInProcessing[processedAward.awardState]++;
+         
         });
 
   //      this.awardsInProcessing = awardsInProcessing
   this.awardBreakDown = awardBreakDown;
-  console.log('award currently being processed',  this.awardsInProcessing);
+  console.log('awardsInProcessing are',  this.awardsInProcessing);
+
+  //Grab total number of in progress awards
+  this.awardsInProcessing['Total'] = _.reduce(this.awardsInProcessing, function(result,val) {return result+val},0);
 
 
-
+  this.categorizeCompletedAwards();
 
   return Observable.create(observer => {
    // observer.next('analyzeAward just emitted an an bservable')
@@ -316,8 +366,64 @@ this._awardsForMatrix.filter(award => !award.useInMatrix ).
   return 1;
   }
 
+//Categorize any awards completed in the past 12 months.  12 months is the default based on data fetch.
+private categorizeCompletedAwards() {
 
 
+  this._awardsForMatrix.filter(award => award.useInChartComplete)
+    .forEach(award => {
+
+      let monthYear = this.timeService.getDateFormatForChart(award.completionDate);
+
+      //Add award to completion metrics
+      if (!this.completionTimesByMonth[monthYear])
+        this.completionTimesByMonth[monthYear] = { completeCount:1, completionDays:award.completionDays };
+      else {
+        
+        let newCount =   this.completionTimesByMonth[monthYear]['completeCount'] +=1;
+        let newCompletionDays = this.completionTimesByMonth[monthYear]['completionDays']+award.completionDays;
+        this.completionTimesByMonth[monthYear] = { completeCount:newCount, completionDays:newCompletionDays };
+     
+
+      }
+
+      console.log('categorizeCompletedAwards: this.completionTimesByMonth', this.completionTimesByMonth);
+
+
+
+    })
+
+
+}
+
+//Grab all of the awards that are complete within past year, have a valid start and boarding complete date
+private categorizeBoardingCompletedAwards() {
+
+  this._awardsForMatrix.filter(award => award.useInBoardingTimeChart)
+  .forEach(award => {
+
+    let monthYear = this.timeService.getDateFormatForChart(award.completionDate);
+
+    //Add award to completion metrics
+    if (!this.boardingCompletionTimesByMonth[monthYear])
+      this.boardingCompletionTimesByMonth[monthYear] = { completeCount:1, completionDays:award.boardingDays };
+    else {
+      
+      let newCount =   this.boardingCompletionTimesByMonth[monthYear]['completeCount'] +=1;
+      let newBoardingDays = this.boardingCompletionTimesByMonth[monthYear]['completionDays']+award.boardingDays;
+      this.boardingCompletionTimesByMonth[monthYear] = { completeCount:newCount, completionDays:newBoardingDays };
+   
+
+    }
+
+    console.log('categorizeBoardingCompletedAwards: this.boardingCompletionTimesByMonth', this.boardingCompletionTimesByMonth);
+
+
+
+  })
+
+
+}
   
 
   

@@ -85,11 +85,11 @@ export class DataService {
   }
 
   get boardingCompletionTimesByMonth() : Object {
-    return this._completionTimesByMonth;
+    return this._boardingCcompletionTimesByMonth;
   }
 
   set boardingCompletionTimesByMonth(value: Object) {
-    this._completionTimesByMonth = value;
+    this._boardingCcompletionTimesByMonth = value;
   }
 
   set monthGrid(value: Array<string>) {
@@ -220,8 +220,11 @@ this._awardsForMatrix.filter(award => !award.useInMatrix ).
   //Grab total number of in progress awards
   this.awardsInProcessing['Total'] = _.reduce(this.awardsInProcessing, function(result,val) {return result+val},0);
 
-
+  //Break down completed awards over past 12 (default) months
   this.categorizeCompletedAwards();
+
+  //Brwak down completed awards boarding stats over past 12 (defualt) months
+  this.categorizeBoardingCompletedAwards();
 
   return Observable.create(observer => {
    // observer.next('analyzeAward just emitted an an bservable')
@@ -387,17 +390,27 @@ private categorizeCompletedAwards() {
 
       }
 
-      console.log('categorizeCompletedAwards: this.completionTimesByMonth', this.completionTimesByMonth);
+     // console.log('categorizeCompletedAwards: this.completionTimesByMonth', this.completionTimesByMonth);
 
 
 
     })
+
+    //Fill in any 'Month Year' combinations that have no entry 
+  this.monthGrid.forEach(monthYear => {
+    if (!this.completionTimesByMonth[monthYear]) 
+    this.completionTimesByMonth[monthYear] = { completeCount:0, completionDays:0 };
+  });
+
+  console.log('categorizeCompletedAwards: this.completionTimesByMonth', this.completionTimesByMonth);
 
 
 }
 
 //Grab all of the awards that are complete within past year, have a valid start and boarding complete date
 private categorizeBoardingCompletedAwards() {
+
+  console.log("categorizeBoardingCompleteAwards: this._awardsForMatrix:",this._awardsForMatrix ); 
 
   this._awardsForMatrix.filter(award => award.useInBoardingTimeChart)
   .forEach(award => {
@@ -416,11 +429,23 @@ private categorizeBoardingCompletedAwards() {
 
     }
 
-    console.log('categorizeBoardingCompletedAwards: this.boardingCompletionTimesByMonth', this.boardingCompletionTimesByMonth);
+   // console.log('categorizeBoardingCompletedAwards: this.boardingCompletionTimesByMonth', this.boardingCompletionTimesByMonth);
 
 
 
   })
+
+  //Fill in any 'Month Year' combinations that have no entry 
+  this.monthGrid.forEach(monthYear => {
+    if (!this.boardingCompletionTimesByMonth[monthYear]) 
+    this.boardingCompletionTimesByMonth[monthYear] = { completeCount:0, completionDays:0 };
+  });
+
+
+  console.log('categorizeBoardingCompletedAwards: this.boardingCompletionTimesByMonth', this.boardingCompletionTimesByMonth);
+
+
+  
 
 
 }

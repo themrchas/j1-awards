@@ -1,7 +1,11 @@
-<!-- <ul>
-  <li *ngFor="let award of awards">Award Number:{{award.awardNumber}}, Completion Days:{{award.completionDays}}</li>
-</ul>
 
-<app-award-table [awards]="awards"></app-award-table> -->
 
-<h2>This is the charts.compomnent.html component</h2>
+<div class="chartDiv">
+  <canvas baseChart
+    [datasets]="chartDataToDisplay"
+    [labels]="chartLabels"
+    [options]="options"
+    [chartType]="lineChartType">
+ 
+  </canvas>
+</div>

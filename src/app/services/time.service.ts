@@ -15,15 +15,19 @@ export class TimeService {
   createTimeRange(currentTime:moment.Moment, monthLookback?:number): Array<string> {
     let timeRange = [];
 
-    //const baseTimeDate: string = moment(currentTime).toString();
+   // const baseTimeDate: string = moment(currentTime).toString();
+   const baseTimeDate: string = currentTime.format("MMM YYYY");
+
+   
  
     //Create specified number of months 
-    for(let i = (monthLookback) ? monthLookback : 12; i>0; i--) 
+    for(let i = (monthLookback) ? monthLookback : 11; i>0; i--) 
    
       
-     //   timeRange.push(moment(currentTime,"YYYY-MM-DD").subtract(i,'months').format('MMM YYYY'));
-     timeRange.push(currentTime.subtract(i,'months').format('MMM YYYY'));
+       timeRange.push(moment(currentTime,"YYYY-MM-DD").subtract(i,'months').format('MMM YYYY'));
+    // timeRange.push(currentTime.subtract(i,'months').format('MMM YYYY'));
 
+    timeRange.push(baseTimeDate);
     return timeRange
 
 

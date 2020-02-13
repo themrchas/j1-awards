@@ -11,9 +11,12 @@
     <div class="row">
       <div class="col-sm">
         One of three columns
+      <!--  <app-charts [chartLabels]="chartLabels" [chartData]="[1,2]"></app-charts> -->
+      <app-charts [chartLabels]="chartLabels" [chartData]="awardCompleteChartData"></app-charts>
       </div>
       <div class="col-sm">
         One of three columns
+        <app-charts [chartLabels]="chartLabels" [chartData]="awardBoardingChartData"></app-charts>
       </div>
       <div class="col-sm">
         One of three columns

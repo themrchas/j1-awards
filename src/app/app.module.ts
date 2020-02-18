@@ -12,6 +12,9 @@ import { DataProviderService } from './../app/services/data-provider.service';
 
 import { InProgressComponent } from './components/in-progress/in-progress.component';
 
+import { DisplayRowTotalPipe } from './pipes/display-row-total.pipe';
+import { DisplayColTotalPipe } from './pipes/display-col-total.pipe';
+
 export function dataProviderFactory(provider: DataProviderService) {
   return () => provider.load();
 }
@@ -21,7 +24,9 @@ export function dataProviderFactory(provider: DataProviderService) {
     AppComponent,
     ChartsComponent,
     AwardTableComponent,
-    InProgressComponent
+    InProgressComponent,
+    DisplayRowTotalPipe,
+    DisplayColTotalPipe
     
   ],
   imports: [

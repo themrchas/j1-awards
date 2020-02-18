@@ -17,6 +17,7 @@ export class ChartsComponent implements OnInit {
  
   @Input() chartLabels: Array<string>;
   @Input() chartData: Object;
+  @Input() legend: string;
 
   //works static chartLabels: Array<string> = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
   
@@ -58,7 +59,7 @@ export class ChartsComponent implements OnInit {
 
 
   //works  this.chartDataToDisplay = [{ data: [1,2,3,4,5,6,7,8,9,10,11,12] , label:"Award Average Days to Completion" }]
-  this.chartDataToDisplay = [{ data: this.chartData , label:"Award Average Days to Completion" }]
+  this.chartDataToDisplay = [{ data: this.chartData , label:this.legend }]
  
  }
 

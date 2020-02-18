@@ -35,11 +35,17 @@ export class DataService {
   private _awardsInProcessing: Object = {};
   
 
-  //Object consiting of order as key and properties  { "Jan 2001": { completeCount:5, completionDays:4 } }
+  //Object consiting of 'Month Year' (MMM YYYY) as key and properties  { "Jan 2001": { completeCount:5, completionDays:4 } }
+  //Property completeCount is the number of awards completed and completionDays is the sum of time it took all awards to complete
   private _completionTimesByMonth: Object ={};
 
-  //Object consiting of order as key and properties  { "Jan 2001": { completeCount:5, completionDays:4 } }
-  private _boardingCcompletionTimesByMonth: Object ={};
+  //Object consiting of 'Month Year' (MMM YYYY) as key and properties  { "Jan 2001": { completeCount:5, completionDays:4 } }
+  //Property completeCount is the number of awards completed in which boarding is completed and completionDays is the sum of time it took for boarding process
+  private _boardingCompletionTimesByMonth: Object ={};
+
+  //Object consiting of 'Month Year' (MMM YYYY) as key and properties  { "Jan 2001": { completeCount:5, completionDays:4 } } 
+  //Property completeCount is the number of awards completed and in which QC is completed and completionDays is the sum of time it took all awards to QC awards
+  private _qcCompletionTimesByMonth: Object = {};
   
   //Array consiting of entries of "Jan 2001" - "MMM YYYY"
   private _monthGrid: Array<string>;
@@ -76,6 +82,10 @@ export class DataService {
     this._awardBreakDown = value;
   }
 
+  get awardsForMatrix() {
+    return this._awardsForMatrix;
+  }
+
   get completionTimesByMonth() : Object {
     return this._completionTimesByMonth;
   }
@@ -85,11 +95,19 @@ export class DataService {
   }
 
   get boardingCompletionTimesByMonth() : Object {
-    return this._boardingCcompletionTimesByMonth;
+    return this._boardingCompletionTimesByMonth;
   }
 
   set boardingCompletionTimesByMonth(value: Object) {
-    this._boardingCcompletionTimesByMonth = value;
+    this._boardingCompletionTimesByMonth = value;
+  }
+
+  get qcCompletionTimesByMonth() : Object {
+    return this._qcCompletionTimesByMonth;
+  }
+
+  set qcCompletionTimesByMonth(value: Object) {
+    this._qcCompletionTimesByMonth = value;
   }
 
   set monthGrid(value: Array<string>) {
@@ -225,6 +243,8 @@ this._awardsForMatrix.filter(award => !award.useInMatrix ).
 
   //Brwak down completed awards boarding stats over past 12 (defualt) months
   this.categorizeBoardingCompletedAwards();
+
+  this.categorizeQCCompletedAwards();
 
   return Observable.create(observer => {
    // observer.next('analyzeAward just emitted an an bservable')
@@ -363,10 +383,11 @@ this._awardsForMatrix.filter(award => !award.useInMatrix ).
   } 
 
   
+ //Return the count of awards used in the completed matrix calculations
+  public getTotalMatrixAwardsCount(): number {
 
-  public getTotalAwards(): number {
-  //  return Award.getTotalAwards();
-  return 1;
+   return this.awardsForMatrix.filter(award => award.useInChartComplete).length;
+  
   }
 
 //Categorize any awards completed in the past 12 months.  12 months is the default based on data fetch.
@@ -405,9 +426,9 @@ private categorizeCompletedAwards() {
   console.log('categorizeCompletedAwards: this.completionTimesByMonth', this.completionTimesByMonth);
 
 
-}
+} //categorizeCompletedAwards
 
-//Grab all of the awards that are complete within past year, have a valid start and boarding complete date
+//Grab all of the awards that are complete within past year, have a valid boarding start and boarding complete date
 private categorizeBoardingCompletedAwards() {
 
   console.log("categorizeBoardingCompleteAwards: this._awardsForMatrix:",this._awardsForMatrix ); 
@@ -415,7 +436,7 @@ private categorizeBoardingCompletedAwards() {
   this._awardsForMatrix.filter(award => award.useInBoardingTimeChart)
   .forEach(award => {
 
-    let monthYear = this.timeService.getDateFormatForChart(award.completionDate);
+    let monthYear = this.timeService.getDateFormatForChart(award.boardingCompletionDate);
 
     //Add award to completion metrics
     if (!this.boardingCompletionTimesByMonth[monthYear])
@@ -445,13 +466,54 @@ private categorizeBoardingCompletedAwards() {
   console.log('categorizeBoardingCompletedAwards: this.boardingCompletionTimesByMonth', this.boardingCompletionTimesByMonth);
 
 
+
+
+} //categorizeBoardingCompletedAwards
+  
+
+  //Grab all of the awards that are complete within past year, have a valid QC start and boarding QC complete date 
+private categorizeQCCompletedAwards() {
+
+  console.log("categorizeQCCompleteAwards: this._awardsForMatrix:",this._awardsForMatrix ); 
+
+  //Grab awards that are complete and have a valid QC start and QC complete timestamp
+  this._awardsForMatrix.filter(award => award.useInQCTimeChart)
+  .forEach(award => {
+
+    let monthYear = this.timeService.getDateFormatForChart(award.qcCompletionDate);
+
+    //Add award to completion metrics
+    if (!this.qcCompletionTimesByMonth[monthYear])
+      this.qcCompletionTimesByMonth[monthYear] = { completeCount:1, completionDays:award.qcDays };
+    else {
+      
+      let newCount =   this.qcCompletionTimesByMonth[monthYear]['completeCount'] +=1;
+      let newQCDays = this.qcCompletionTimesByMonth[monthYear]['completionDays']+award.qcDays;
+      this.qcCompletionTimesByMonth[monthYear] = { completeCount:newCount, completionDays:newQCDays };
+   
+
+    }
+
+   // console.log('categorizeBoardingCompletedAwards: this.boardingCompletionTimesByMonth', this.boardingCompletionTimesByMonth);
+
+
+
+  })
+
+  //Fill in any 'Month Year' combinations that have no entry 
+  this.monthGrid.forEach(monthYear => {
+    if (!this.qcCompletionTimesByMonth[monthYear]) 
+    this.qcCompletionTimesByMonth[monthYear] = { completeCount:0, completionDays:0 };
+  });
+
+
+  console.log('categorizeQCCompletedAwards: this.qcCompletionTimesByMonth', this.qcCompletionTimesByMonth);
+
+
   
 
 
 }
-  
-
-  
   
 
 

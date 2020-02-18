@@ -44,6 +44,9 @@ export class Award {
     //True if the award is complete in the past 12 months (default) and has a valid DateSentToBoarding, DateCompleteBoarding, and DateComplete timestamp
     private _useInBoardingTimeChart: boolean;
 
+    //True if this award has a completion time in the past 12 months (defualt) and has a valid DateSentToQC and DateCompleteQC timestamp
+    private _useInQCTimeChart: boolean;
+
     
     constructor(rawAward: any) {
 
@@ -59,7 +62,7 @@ export class Award {
         this._awardStatus = rawAward.AwardStatus || null;
         this._dateAccepted = rawAward.DateAccepted || null;
         this._dateAwardComplete = rawAward.DateComplete || null;
-        this._dateSentToQC = rawAward.DateSentToQc || null;
+        this._dateSentToQC = rawAward.DateSentToQC || null;
         this._dateCompleteQC = rawAward.DateCompletedQC || null;
         this._dateStartBoarding = rawAward.DateSentToBoarding || null;
         this._dateCompleteBoarding = rawAward.DateBoardingComplete || null;
@@ -81,9 +84,14 @@ export class Award {
         this._useInBoardingTimeChart = ( this._dateAwardComplete ) && (this._dateStartBoarding) && ( this._dateCompleteBoarding) &&
             ( moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
 
+        //This award to be used in the QC chart if time difference between completed award date and now is less than a year and both 
+        //_dateSentToQC and _date CompleteQC are defined
+        this._useInQCTimeChart = ( this._dateAwardComplete ) && (this._dateSentToQC) && ( this._dateCompleteQC) &&
+        ( moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
+
 
         //If the award is not complete, then that means that it is currently in some state of the awards process per the data pull filter
-        //Need to verify 'CMD GRP', 'J1 Final Stages', and 'Mailed this week'
+        //Need to verify 'CMD GRP', 'J1 Final Stages', and 'Mailed this week' with J1
         if (!this._useInMatrix) {
 
             switch(this._awardStatus) {
@@ -148,12 +156,30 @@ export class Award {
          return this._dateAwardComplete;
      }
 
+     get qcCompletionDate() {
+         return this._dateCompleteQC;
+     }
+
+
+     get boardingCompletionDate() {
+         return this._dateCompleteBoarding
+     }
+
+      //Returns true if an award should be used in matrix calculations
+    get useInMatrix(): boolean {
+        return this._useInMatrix;
+    }
+
      get useInChartComplete() {
          return this._useInChartComplete
      }
 
      get useInBoardingTimeChart() {
          return this._useInBoardingTimeChart;
+     }
+
+      get useInQCTimeChart() {
+         return this._useInQCTimeChart;
      }
   
 
@@ -189,14 +215,10 @@ export class Award {
         return moment.duration(qcEnd.diff(qcStart)).as('days');
     
     }
-    
-    //Returns true if an award should be used in matrix calculations
-    get useInMatrix(): boolean {
-        return this._useInMatrix;
-    }
+     
 
 
-    //Return the current status of the award that is not complete.  
+    //Return the current status of the award   
     get awardState() : string {
         return this._awardState;
     }

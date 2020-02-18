@@ -11,15 +11,15 @@
     <div class="row">
       <div class="col-sm">
         One of three columns
-      <!--  <app-charts [chartLabels]="chartLabels" [chartData]="[1,2]"></app-charts> -->
-      <app-charts [chartLabels]="chartLabels" [chartData]="awardCompleteChartData"></app-charts>
+      <app-charts [chartLabels]="chartLabels" [chartData]="awardCompleteChartData" [legend]="chartLegends.complete"></app-charts>
       </div>
       <div class="col-sm">
-        One of three columns
-        <app-charts [chartLabels]="chartLabels" [chartData]="awardBoardingChartData"></app-charts>
+        Two of three columns
+        <app-charts [chartLabels]="chartLabels" [chartData]="awardBoardingChartData" [legend]="chartLegends.boarding"></app-charts>
       </div>
       <div class="col-sm">
-        One of three columns
+        Three of three columns
+        <app-charts [chartLabels]="chartLabels" [chartData]="awardQCChartData" [legend]="chartLegends.qc"></app-charts>
       </div>
     </div>
 </div>

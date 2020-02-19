@@ -1,27 +1,29 @@
 
 <table mdbTable bordered="true" small="true" class="text-center">
   <thead>
+    <tr >
+      <th colspan="100%">{{matrixTitle}}</th>
+    </tr>
     <tr style="background-color: #c9feff;">
       <th>Type/Unit</th>
       <th *ngFor="let unit of unitsList">{{unit}}</th>
-      <th>Total</th>
+      <th class="total-row">Total</th>
     </tr>
 
   </thead>
   <tbody>
     <tr mdbTableCol *ngFor="let award of awardTypes">
       <th scope="row">{{award}}</th>
-     <!-- <td *ngFor="let unit of unitList">{{award}}-{{unit}}</td> -->
-     <td *ngFor="let unit of unitsList">{{awardBreakDown[unit][award]}}</td>
-    <!-- <td>{{calculateAwardTotalRow(award)}}</td> -->
-    <td>{{award | displayRowTotal: awardBreakDown}}</td>
+    
+      <td *ngFor="let unit of unitsList">{{awardBreakDown[unit][award]}}</td>
+    
+      <td class="total-row">{{award | displayRowTotal: awardBreakDown}}</td>
     </tr>
     <tr>
-      <th>Total</th>
-     <!-- <td *ngFor="let unit of unitsList">{{calculateAwardTotalCol(unit)}}</td> -->
-     <td *ngFor="let unit of unitsList">{{unit | displayColTotal:awardBreakDown}}</td>
-     <td>{{awardCount}}</td> 
-     
+      <th class="total-row">Total</th>
+      <td class="total-row" *ngFor="let unit of unitsList">{{unit | displayColTotal:awardBreakDown}}</td>
+      <td class="total-row">{{awardCount}}</td>
+    
     </tr>
   </tbody>
 </table> 

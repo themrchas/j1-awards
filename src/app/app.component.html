@@ -1,25 +1,35 @@
-<div class="container-fluid">
-    <div class="row">
+<div class="container">
+    <div class="row justify-content-start">
       <div class="col">
         <app-in-progress></app-in-progress>
       </div>
       <div class="col">
         <app-award-table></app-award-table>
       </div>
-
     </div>
-    <div class="row">
-      <div class="col-sm">
-        One of three columns
-      <app-charts [chartLabels]="chartLabels" [chartData]="awardCompleteChartData" [legend]="chartLegends.complete"></app-charts>
+
+    <div id="chart-description">
+      <div class="row">
+        <div class="col-8 offset-2 text-center">
+          Award Completion Data
+        </div>
       </div>
-      <div class="col-sm">
-        Two of three columns
-        <app-charts [chartLabels]="chartLabels" [chartData]="awardBoardingChartData" [legend]="chartLegends.boarding"></app-charts>
+    </div>
+
+
+    <div class="row mt-5">
+      <div class="col-8 offset-2">
+          <app-charts [chartLabels]="chartLabels" [chartData]="awardCompleteChartData" [legend]="chartLegends.complete"></app-charts>
       </div>
-      <div class="col-sm">
-        Three of three columns
-        <app-charts [chartLabels]="chartLabels" [chartData]="awardQCChartData" [legend]="chartLegends.qc"></app-charts>
+    </div>
+    <div class="row mt-5">
+      <div class="col-8 offset-2">
+            <app-charts [chartLabels]="chartLabels" [chartData]="awardBoardingChartData" [legend]="chartLegends.boarding"></app-charts>
+      </div>
+    </div>
+    <div class="row mt-5">
+      <div class="col-8 offset-2">
+            <app-charts [chartLabels]="chartLabels" [chartData]="awardQCChartData" [legend]="chartLegends.qc"></app-charts>
       </div>
     </div>
 </div>

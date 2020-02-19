@@ -5,3 +5,23 @@ $borderColor : red;
     border-style: solid;
   
 }
+
+.container, .container-fluid {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: solid 2px black
+
+}
+
+.chart {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#chart-description {
+    margin-top: 50px;
+    margin-bottom: 20px;
+    font-size: 2rem;
+    
+}
+

@@ -19,7 +19,7 @@ export class ChartsComponent implements OnInit {
   @Input() chartData: Object;
   @Input() legend: string;
 
-  //works static chartLabels: Array<string> = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+  
   
   lineChartType: string = "line"
 
@@ -31,8 +31,9 @@ export class ChartsComponent implements OnInit {
 
   options = {
     legend: { display:true, position:"bottom",
-              labels: {boxWidth:0}
-         }
+              labels: {boxWidth:0, fontSize:16}
+         },
+    
 
 
    }
@@ -46,20 +47,8 @@ export class ChartsComponent implements OnInit {
     console.log("ngoninit: charts.components chartData:",this.chartData);
 
   
-
-    
-
-  /*  this.chartLabels.forEach(monthDate => {
-
-      if (this.chartData[monthDate].completeCount == 0)
-        this.chartDataToDisplay.push(0);
-      else
-        this.chartDataToDisplay.push(Math.ceil(this.chartData[monthDate].completionDays/this.chartData[monthDate].completeCount));
-    })  */
-
-
-  //works  this.chartDataToDisplay = [{ data: [1,2,3,4,5,6,7,8,9,10,11,12] , label:"Award Average Days to Completion" }]
-  this.chartDataToDisplay = [{ data: this.chartData , label:this.legend }]
+ 
+  this.chartDataToDisplay = [{ data: this.chartData , label:this.legend, fill: false, borderColor: "#858481" }]
  
  }
 

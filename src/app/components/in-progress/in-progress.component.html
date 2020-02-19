@@ -1,10 +1,10 @@
 <div class="container">
     <div class="row">
-        <div class="col title">
+        <div class="col" id="title">
             Award Tracker
         </div>
     </div>
-    <div *ngFor="let category of awardsInProcessing | keyvalue" class="row">
+    <div *ngFor="let category of awardsInProcessing | keyvalue" class="row item">
         <div class="col-sm">
             {{category.key}}
         </div>

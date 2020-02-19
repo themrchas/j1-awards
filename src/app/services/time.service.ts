@@ -33,9 +33,7 @@ export class TimeService {
 
   }
 
- //// subtractYearFromDate(baseDate: moment.Moment): string {
- //   return baseDate.subtract(1,'years').format("YYYY-MM-DD");
- // }
+ 
  subtractYearFromDate(baseDate: string): string {
     // return moment(baseDate).subtract(1,'years').format("YYYY-MM-DD:THH:mm:ss");
     return moment(baseDate).subtract(1,'years').toISOString();
@@ -44,6 +42,11 @@ export class TimeService {
   //Return a string dtae in the format 'Jan 2019' / 'MMM YYYY'
   getDateFormatForChart(date:string): string {
       return moment(date).format("MMM YYYY");
+  }
+
+  //Returns the current fiscal year as YY
+  getCurrentFiscalYear() {
+    return moment().format("YY");
   }
 
 

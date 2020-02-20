@@ -6,6 +6,8 @@ import { environment } from './../../environments/environment';
 
 import { Injectable, OnInit } from '@angular/core';
 
+//mport { ConfigProviderService} from './config-provider.service';
+
 
 @Injectable({
   providedIn: 'root'
@@ -19,9 +21,11 @@ export class SpService implements OnInit {
 
 
  //awardListRestEndPointBase:string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('Award Metrics')/items";
- awardListRestEndPointBase:string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('AwardsMetrics')/items";
+ //awardListRestEndPointBase:string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('AwardsMetrics')/items";
+ awardListRestEndPointBase:string = environment.listWeb+"/_api/web/lists/getbytitle('AwardsMetrics')/items";
 
- awardMatrixListRestEndPoint: string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('Awards Matrix Slide')/items";
+ //awardMatrixListRestEndPoint: string = "http://localhost:8080/sites/dev/socafdev/_api/web/lists/getbytitle('Awards Matrix Slide')/items";
+ awardMatrixListRestEndPoint: string = environment.listWeb+"/_api/web/lists/getbytitle('Awards Matrix Slide')/items";
  
 
   constructor(private httpClient: HttpClient) { }
@@ -83,6 +87,24 @@ export class SpService implements OnInit {
               tap(val => console.log('sp.service.geMatrixLabels tap: Http call returned', val))
           
             )
+
+
+  }
+
+  getConfig():Observable<any> {
+
+   // let filePath = environment.listWeb+configFile;
+    //let filePath = environment.listWeb+"AwardsApp/"+configFile;
+    //let filePath = "./"+configFile;
+
+    console.log('sp.service.getConfig: Getting file '+environment.configPath);
+
+    //return this.httpClient.get(filePath, {headers: this.httpHeaders})
+    return this.httpClient.get(environment.configPath)
+     .pipe (
+              tap(val => console.log('sp.service.getConfig tap: Http call returned', val))
+          
+            ) 
 
 
   }

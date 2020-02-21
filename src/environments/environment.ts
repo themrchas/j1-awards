@@ -4,10 +4,18 @@
 
 export const environment = {
   production: false,
-  listWeb: "default envVaribale listWeb"
-  
-  
+  listWeb: "default envVaribale listWeb",
+  configPath:"",
+  filter: 
+  [
+               "startswith(AwardStatus,'Pending Review') or startswith(AwardStatus,'Accept for')",
+               "or (AwardStatus eq 'J1 QC Review') or (AwardStatus eq 'SJS QC Review') or (AwardStatus eq 'Ready for Boarding') or startswith(AwardStatus,'Board Member ')",
+               "or (AwardStatus eq 'Pending CG Signature' ) or (AwardStatus eq 'Boarding Complete') or (AwardStatus eq 'With HRC') or (AwardStatus eq 'With SOCOM')"
+ ]
 };
+  
+  
+
 
 /*
  * For easier debugging in development mode, you can import the following file
@@ -17,3 +25,4 @@ export const environment = {
  * on performance if an error is thrown.
  */
 // import 'zone.js/dist/zone-error';  // Included with Angular CLI.
+

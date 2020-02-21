@@ -43,14 +43,20 @@ export class SpService implements OnInit {
   getData(startDate: string,endDate?: string):Observable<any> {
 
     console.log('sp.service: startDate', startDate, 'end date', endDate);
+    console.log('sp.service: environment.filter', environment.filter, "and configPath is", environment.configPath);
 
     let filter: string // "?$filter=DateComplete ge datetime'"+startDate+"'";
 
     //Filter strings to get data that will show up to the 'left' of the matrix -> awards currently being processed
     let awardStatusesOfInterest  = [];
-    awardStatusesOfInterest.push("startswith(AwardStatus,'Pending Review') or startswith(AwardStatus,'Accept for')");
-    awardStatusesOfInterest.push("or (AwardStatus eq 'J1 QC Review') or (AwardStatus eq 'SJS QC Review') or (AwardStatus eq 'Ready for Boarding') or startswith(AwardStatus,'Board Member ')");
-    awardStatusesOfInterest.push("or (AwardStatus eq 'Pending CG Signature' ) or (AwardStatus eq 'Boarding Complete') or (AwardStatus eq 'With HRC') or (AwardStatus eq 'With SOCOM')");
+   // awardStatusesOfInterest.push("startswith(AwardStatus,'Pending Review') or startswith(AwardStatus,'Accept for')");
+    //awardStatusesOfInterest.push("or (AwardStatus eq 'J1 QC Review') or (AwardStatus eq 'SJS QC Review') or (AwardStatus eq 'Ready for Boarding') or startswith(AwardStatus,'Board Member ')");
+   //awardStatusesOfInterest.push("or (AwardStatus eq 'Pending CG Signature' ) or (AwardStatus eq 'Boarding Complete') or (AwardStatus eq 'With HRC') or (AwardStatus eq 'With SOCOM')");
+    
+   environment.filter.forEach(clause => awardStatusesOfInterest.push(clause))
+
+
+
 
   // filter = "?$filter=("+awardStatusesOfInterest.join(" ")+"or (DateComplete ge datetime'"+startDate+"'))";
   filter = "?$filter=("+awardStatusesOfInterest.join(" ")+"or ( (DateComplete ge datetime'"+startDate+"') and (DateComplete le datetime'"+endDate+"')))";

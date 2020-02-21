@@ -6,6 +6,8 @@ import { environment } from './../../environments/environment';
 
 import { Injectable, OnInit } from '@angular/core';
 
+import { EnvService } from './../services/env.service';
+
 //mport { ConfigProviderService} from './config-provider.service';
 
 
@@ -28,7 +30,7 @@ export class SpService implements OnInit {
  awardMatrixListRestEndPoint: string = environment.listWeb+"/_api/web/lists/getbytitle('Awards Matrix Slide')/items";
  
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient, private env:EnvService) { }
 
 
   ngOnInit() {
@@ -44,6 +46,7 @@ export class SpService implements OnInit {
 
     console.log('sp.service: startDate', startDate, 'end date', endDate);
     console.log('sp.service: environment.filter', environment.filter, "and configPath is", environment.configPath);
+    console.log('sp.service env.name is', this.env.name);
 
     let filter: string // "?$filter=DateComplete ge datetime'"+startDate+"'";
 

@@ -15,6 +15,8 @@ import { InProgressComponent } from './components/in-progress/in-progress.compon
 import { DisplayRowTotalPipe } from './pipes/display-row-total.pipe';
 import { DisplayColTotalPipe } from './pipes/display-col-total.pipe';
 
+import { EnvServiceProvider } from './services/env.service.provider';
+
 export function dataProviderFactory(provider: DataProviderService) {
   return () => provider.load();
 }
@@ -35,7 +37,7 @@ export function dataProviderFactory(provider: DataProviderService) {
     MDBBootstrapModule.forRoot(),
     ChartsModule
   ],
-  providers: [
+  providers: [EnvServiceProvider,
     DataProviderService, 
     { provide: APP_INITIALIZER, useFactory: dataProviderFactory, deps: [DataProviderService], multi: true }
   ],

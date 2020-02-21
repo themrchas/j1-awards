@@ -27,3 +27,7 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
 
  j1_Charts, M-gH2Ys-QkmKGAjyyAys
+
+ ##Angular environmental variable strategy that can be used so that you don't have rebuild an app just to change a few variables.
+ /environments/environment.###.ts files can be useful for various builds, but using environmental variables allows you to change
+ data on the fly in place.    https://www.jvandemo.com/how-to-use-environment-variables-to-configure-your-angular-application-without-a-rebuild/

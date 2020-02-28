@@ -35,14 +35,14 @@ export class AwardTableComponent implements OnInit {
     //The complete cartesian product of awards x units filled out with counts.
     this.awardBreakDown = this.dataService.awardBreakDown;
 
-    console.log('Award brekdown is', this.awardBreakDown);
+    console.log('award-table.component: Award breakdown is', this.awardBreakDown);
     this.unitsList = this.dataService.unitsList;
 
     this.awardTypes = this.dataService.awardTypesList;
 
     this.awardCount = this.dataService.getTotalMatrixAwardsCount();
 
-    this.matrixTitle = "FY"+this.timeService.getCurrentFiscalYear()+" Award Break Down"
+    this.matrixTitle = this.timeService.getCurrentPhysicalYear()+" Award Break Down"
 
     
   } //ngOnInit

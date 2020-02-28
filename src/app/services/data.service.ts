@@ -3,6 +3,7 @@ import { tap, map } from 'rxjs/operators';
 import { Observable , forkJoin,  of, from } from 'rxjs';
 import { Injectable, OnInit } from '@angular/core';
 import { SpService } from "./sp.service";
+import { ConfigProviderService } from './config-provider.service';
 
 import { TimeService } from "./time.service";
 
@@ -52,7 +53,7 @@ export class DataService {
 
 
   //Categories for awards that are not complete and in some state of processing
-  private _inProgressTypes = ["New Submissions", "J1QC", "Ready for Boarding","Board Members","CMD GRP","J1 Final Stages","Total"]
+  private _inProgressTypes = ["New Submissions", "J1QC", "Ready for Boarding","Board Members","CMD GRP","J1 Final Stages","Unknown","Total"]
 
  
 
@@ -131,7 +132,8 @@ export class DataService {
   }
 
 
-  constructor(private spService: SpService, private timeService: TimeService) { }
+ // constructor(private spService: SpService, private timeService: TimeService, private config, private configProviderService:ConfigProviderService) { }
+ constructor(private spService: SpService, private timeService: TimeService, private configProviderService:ConfigProviderService) { }
 
 
 
@@ -161,13 +163,12 @@ export class DataService {
 
   let awardBreakDown: any = {};
 
-    //console.log('*******data.service.analyzeAwardData can access awards object',this.awardBreakDown);
-    console.log('raw data list after initial processing is', this._awardsForMatrix);
+    this.configProviderService.config.doLog && console.log('raw data list after initial processing is', this._awardsForMatrix);
 
     //Grab data identified as to be used in the matrix 
     this._awardsForMatrix.filter(award => award.useInMatrix ).
         forEach(function(processedAward) {
-  //  this._awardsForMatrix.forEach(function(processedAward) {
+  
 
       let award: string = (processedAward.awardSubType !== null) ? processedAward.awardSubType : processedAward.awardType;
 
@@ -241,7 +242,7 @@ this._awardsForMatrix.filter(award => !award.useInMatrix ).
   //Break down completed awards over past 12 (default) months
   this.categorizeCompletedAwards();
 
-  //Brwak down completed awards boarding stats over past 12 (defualt) months
+  //Break down completed awards boarding stats over past 12 (defualt) months
   this.categorizeBoardingCompletedAwards();
 
   this.categorizeQCCompletedAwards();
@@ -383,11 +384,10 @@ this._awardsForMatrix.filter(award => !award.useInMatrix ).
   } 
 
   
- //Return the count of awards used in the completed matrix calculations
+ //Return the count of awards used that have been identified to be used in matrix.
   public getTotalMatrixAwardsCount(): number {
-
-   return this.awardsForMatrix.filter(award => award.useInChartComplete).length;
-  
+    
+      return this.awardsForMatrix.filter(award => award.useInMatrix).length;
   }
 
 //Categorize any awards completed in the past 12 months.  12 months is the default based on data fetch.
@@ -398,6 +398,8 @@ private categorizeCompletedAwards() {
     .forEach(award => {
 
       let monthYear = this.timeService.getDateFormatForChart(award.completionDate);
+
+      this.configProviderService.config.doLog && console.log('data.service.categorizeCompletedAwards - award analyzed is: ',award);
 
       //Add award to completion metrics
       if (!this.completionTimesByMonth[monthYear])
@@ -411,11 +413,11 @@ private categorizeCompletedAwards() {
 
       }
 
-     // console.log('categorizeCompletedAwards: this.completionTimesByMonth', this.completionTimesByMonth);
+     // this.configProviderService.config.doLog && console.log('data.service.categorizeCompletedAwards: this.completionTimesByMonth is now', this.completionTimesByMonth.valueOf());
 
 
 
-    })
+    }) //forEach
 
     //Fill in any 'Month Year' combinations that have no entry 
   this.monthGrid.forEach(monthYear => {
@@ -423,7 +425,7 @@ private categorizeCompletedAwards() {
     this.completionTimesByMonth[monthYear] = { completeCount:0, completionDays:0 };
   });
 
-  console.log('categorizeCompletedAwards: this.completionTimesByMonth', this.completionTimesByMonth);
+  this.configProviderService.config.doLog && console.log('categorizeCompletedAwards: this.completionTimesByMonth final', this.completionTimesByMonth);
 
 
 } //categorizeCompletedAwards
@@ -431,10 +433,11 @@ private categorizeCompletedAwards() {
 //Grab all of the awards that are complete within past year, have a valid boarding start and boarding complete date
 private categorizeBoardingCompletedAwards() {
 
-  console.log("categorizeBoardingCompleteAwards: this._awardsForMatrix:",this._awardsForMatrix ); 
-
+  
   this._awardsForMatrix.filter(award => award.useInBoardingTimeChart)
   .forEach(award => {
+
+    this.configProviderService.config.doLog && console.log('data.service.categorizeBoardingCompletedAwards - award analyzed is: ',award, 'with boardingDays',award.boardingDays);
 
     let monthYear = this.timeService.getDateFormatForChart(award.boardingCompletionDate);
 
@@ -450,11 +453,11 @@ private categorizeBoardingCompletedAwards() {
 
     }
 
-   // console.log('categorizeBoardingCompletedAwards: this.boardingCompletionTimesByMonth', this.boardingCompletionTimesByMonth);
+    
+  }) //forEach
 
+ 
 
-
-  })
 
   //Fill in any 'Month Year' combinations that have no entry 
   this.monthGrid.forEach(monthYear => {
@@ -463,7 +466,7 @@ private categorizeBoardingCompletedAwards() {
   });
 
 
-  console.log('categorizeBoardingCompletedAwards: this.boardingCompletionTimesByMonth', this.boardingCompletionTimesByMonth);
+  this.configProviderService.config.doLog && console.log('data.service.categorizeBoardingCompletedAwards: this.boardingCompletionTimesByMonth final', this.boardingCompletionTimesByMonth);
 
 
 
@@ -474,7 +477,7 @@ private categorizeBoardingCompletedAwards() {
   //Grab all of the awards that are complete within past year, have a valid QC start and boarding QC complete date 
 private categorizeQCCompletedAwards() {
 
-  console.log("categorizeQCCompleteAwards: this._awardsForMatrix:",this._awardsForMatrix ); 
+  console.log("data.service.categorizeQCCompleteAwards: this._awardsForMatrix:",this._awardsForMatrix ); 
 
   //Grab awards that are complete and have a valid QC start and QC complete timestamp
   this._awardsForMatrix.filter(award => award.useInQCTimeChart)
@@ -507,7 +510,7 @@ private categorizeQCCompletedAwards() {
   });
 
 
-  console.log('categorizeQCCompletedAwards: this.qcCompletionTimesByMonth', this.qcCompletionTimesByMonth);
+   this.configProviderService.config.doLog && console.log('categorizeQCCompletedAwards: this.qcCompletionTimesByMonth', this.qcCompletionTimesByMonth);
 
 
   

@@ -45,9 +45,11 @@ export class TimeService {
   }
 
   //Returns the current fiscal year as YY
-  getCurrentFiscalYear() {
-    return moment().format("YY");
+  getCurrentPhysicalYear() {
+    return moment().format("YYYY");
   }
+
+  
 
 
 } //TimeService

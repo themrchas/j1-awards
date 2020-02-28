@@ -17,6 +17,8 @@ export const EnvServiceFactory = () => {
     }
   }
 
+  console.log("env.service.provider.ts: returning env as", env);
+
   return env;
 };
 

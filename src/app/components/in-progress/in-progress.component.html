@@ -4,12 +4,12 @@
             Award Tracker
         </div>
     </div>
-    <div *ngFor="let category of awardsInProcessing | keyvalue" class="row item">
+    <div *ngFor="let category of inProgressTypes" class="row item">
         <div class="col-sm">
-            {{category.key}}
+            {{category}}
         </div>
         <div class="col-sm">
-            {{category.value}}
+            {{awardsInProcessing[category]}}
         </div>
     </div>
 </div>

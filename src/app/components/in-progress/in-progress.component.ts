@@ -9,12 +9,15 @@ import { DataService } from './../../services/data.service';
 })
 export class InProgressComponent implements OnInit {
 
+ inProgressTypes: Array<string>;
  awardsInProcessing: Object;
+
 
   constructor(private dataService:DataService) { }
 
   ngOnInit() {
 
+    this.inProgressTypes = this.dataService.inProgressTypes
     this.awardsInProcessing = this.dataService.awardsInProcessing;
   }
 

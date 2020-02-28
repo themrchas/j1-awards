@@ -19,89 +19,49 @@ export class DataProviderService {
 
   constructor(private dataService:DataService, private configProviderService:ConfigProviderService) { }
 
-  load() {
-    
-    return new Promise((resolve, reject) => {
+      load() {
 
-      this.configProviderService.getConfiguration()
-          .subscribe(config => {
+            return new Promise((resolve, reject) => {
 
-           // let obj = JSON.parse(config);
-           // console.log('data-provider-service: obj is',obj);
-           console.log('data-provider-service: config.env is',config.env);
-
-            console.log('data-provider-service: config.txt is', config)
-            this.dataService.getInitialAwardData()
-       
-            .pipe(
-               tap(val => console.log('tapped data is',val) ),
-              concatMap(data => this.dataService.analyzeAwardData() ))
-               .subscribe(final => { 
-                     console.log('******conacat map provided',final);
-                     resolve(true) 
-               });
-
-          })
+                  this.configProviderService.getConfiguration()
+                        .subscribe(config => {
 
 
-
-    /*   Attempt to combine  .pipe(
-                tap(val => console.log('config.txt data is',val) ),
-                concatMap(file => this.dataService.getInitialAwardData())
-                .pipe(
-                       tap(val => console.log('tapped data is',val) ),
-                       concatMap(data => this.dataService.analyzeAwardData() ))
-             )
-        
-        .subscribe(final => { 
-          console.log('******conacat map provided',final);
-          resolve(true) 
-    }); */
+                              config.doLog && console.log('config-provider.service: config', config);
 
 
-      
-/* Works w/o config.txt
-      this.dataService.getInitialAwardData()
-       
-       .pipe(
-          tap(val => console.log('tapped data is',val) ),
-         concatMap(data => this.dataService.analyzeAwardData() ))
-          .subscribe(final => { 
-                console.log('******conacat map provided',final);
-                resolve(true) 
-          });
-      */  
+                              this.dataService.getInitialAwardData()
 
-    }) 
-    
+                                    .pipe(
+                                          tap(val => console.log('data-provider.service: tapped data from dataService.getInitialAwardData is', val)),
+                                          concatMap(data => this.dataService.analyzeAwardData()))
+                                    .subscribe(final => {
+                                          console.log('******conacat map provided', final);
+                                          resolve(true)
+                                    });
+
+                        })
+
+
+
+                  /* Works w/o config.txt
+                        this.dataService.getInitialAwardData()
+                         
+                         .pipe(
+                            tap(val => console.log('tapped data is',val) ),
+                           concatMap(data => this.dataService.analyzeAwardData() ))
+                            .subscribe(final => { 
+                                  console.log('******conacat map provided',final);
+                                  resolve(true) 
+                            });
+                        */
+
+            })
 
 
 
 
-
-
-      
-    /*  this.dataService.getInitialAwardData()
-       
-       .pipe(
-          tap(val => console.log('tapped data is',val) ),
-         concatMap(data => this.dataService.analyzeAwardData() ))
-          .subscribe(final => { 
-                console.log('******conacat map provided',final);
-                resolve(true) 
-          });
-        
-
-    }) */
-    
- 
-
-
-
-
-
-
-} 
+} //load
 
 
 

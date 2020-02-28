@@ -1,4 +1,5 @@
 
+
 import * as moment from 'moment';
 
 export class Award {
@@ -50,64 +51,70 @@ export class Award {
     
     constructor(rawAward: any) {
 
+        console.log("Award: award constructor received", rawAward);
+
         let currentYear = moment().format("YYYY")
 
-        this._awardNumber  = rawAward.AwardNumber || null;
-        this._awardType = rawAward.AwardType || null;
-        this._awardSubType = rawAward.AwardSubType || null;
-
-        this._organization = rawAward.Organization || null;
-        this._subordinateUnit = rawAward.subOrganization || null;
-
-        this._awardStatus = rawAward.AwardStatus || null;
-        this._dateAccepted = rawAward.DateAccepted || null;
-        this._dateAwardComplete = rawAward.DateComplete || null;
-        this._dateSentToQC = rawAward.DateSentToQC || null;
-        this._dateCompleteQC = rawAward.DateCompletedQC || null;
-        this._dateStartBoarding = rawAward.DateSentToBoarding || null;
-        this._dateCompleteBoarding = rawAward.DateBoardingComplete || null;
-        this._bm1VoteDate = rawAward.BoardMember1VoteDate || null;
-        this._bm2VoteDate = rawAward.BoardMember2VoteDate || null;
-        this._bm3VoteDate = rawAward.BoardMember3VoteDate || null;
-        this._bm4VoteDate = rawAward.BoardMember4VoteDate || null;
+        this._awardNumber = rawAward.Award_x0020_Number || null;
+        this._awardType = rawAward.Award_x0020_Type || null;
+        this._awardSubType = rawAward.Award_x0020_SubType || null;
+        this._organization = rawAward.SOCAF_x0020_Organization || null;
+        this._subordinateUnit = rawAward.SOCAF_x0020_Subordinate_x0020_Un || null;
+        this._awardStatus = rawAward.SAPS_x0020_Status || null;
+      
+        this._bm1VoteDate = rawAward.BoardMember1VoteTime || null;
+        this._bm2VoteDate = rawAward.BoardMember2VoteTime || null;
+        this._bm3VoteDate = rawAward.BoardMember3VoteTime || null;
+        this._bm4VoteDate = rawAward.BoardMember4VoteTime || null;
         this._dateToHRC = rawAward.DateToHRC || null;
         this._dateToSOCOM = rawAward.dateToSOCOM || null;
 
-        //Award was completed in the current year and date completed has a value
-        this._useInMatrix = ( rawAward.DateComplete ) && ( moment().format("YYYY") == moment(rawAward.DateComplete).format("YYYY") );
+        //With the date assignments below (accepted/QC/boarding) strip off the time portion of the date.
+        this._dateAccepted = (rawAward.Date_x0020_Accepted) ? moment(rawAward.Date_x0020_Accepted).format("YYYY-MM-DD") : null;
+        this._dateAwardComplete = (rawAward.DateComplete) ? moment(rawAward.DateComplete).format("YYYY-MM-DD") : null;
+
+        this._dateSentToQC = (rawAward.DateSentToQC) ? moment(rawAward.DateSentToQC).format("YYYY-MM-DD") : null;
+        this._dateCompleteQC = (rawAward.DateCompletedQC) ? moment(rawAward.DateCompletedQC).format("YYYY-MM-DD") : null;
+
+        this._dateStartBoarding = (rawAward.DateSentToBoarding) ? moment(rawAward.DateSentToBoarding).format("YYYY-MM-DD") : null;
+        this._dateCompleteBoarding = (rawAward.Date_x0020_Boarding_x0020_Comple) ? moment(rawAward.Date_x0020_Boarding_x0020_Comple).format("YYYY-MM-DD") : null;
+
+        //Award was completed in the current year and date completed has a value.  This award is considered 'Complete' for app purposes.
+        //and will be used in the matrix.
+        this._useInMatrix = (this._dateAwardComplete) && (moment().format("YYYY") == moment(this._dateAwardComplete).format("YYYY"));
 
         //This award is to be used in the Complete Awards chart if has a valid complete and accepted date and completion date is less than/equal to a year old
-        this._useInChartComplete = ( this._dateAwardComplete ) && (this._dateAccepted) && 
-            ( moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
+        this._useInChartComplete = (this._dateAwardComplete) && (this._dateAccepted) &&
+            (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
 
         //This award to be used in the Boarding Time chart if time difference between completed award date and now is less than a year
-        this._useInBoardingTimeChart = ( this._dateAwardComplete ) && (this._dateStartBoarding) && ( this._dateCompleteBoarding) &&
-            ( moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
+        this._useInBoardingTimeChart = (this._dateAwardComplete) && (this._dateStartBoarding) && (this._dateCompleteBoarding) &&
+            (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
 
         //This award to be used in the QC chart if time difference between completed award date and now is less than a year and both 
         //_dateSentToQC and _date CompleteQC are defined
-        this._useInQCTimeChart = ( this._dateAwardComplete ) && (this._dateSentToQC) && ( this._dateCompleteQC) &&
-        ( moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
+        this._useInQCTimeChart = (this._dateAwardComplete) && (this._dateSentToQC) && (this._dateCompleteQC) &&
+            (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
 
 
         //If the award is not complete, then that means that it is currently in some state of the awards process per the data pull filter
         //Need to verify 'CMD GRP', 'J1 Final Stages', and 'Mailed this week' with J1
         if (!this._useInMatrix) {
 
-            switch(this._awardStatus) {
+            switch (this._awardStatus) {
 
-                case  'Pending Review':
-                case  'Pending Review (Resubmit)':
-                case  'Accept for Action':
-                case  'Accept for Action - Resubmit':
+                case 'Pending Review':
+                case 'Pending Review (Resubmit)':
+                case 'Accept for Action':
+                case 'Accept for Action - Resubmit':
                     this._awardState = 'New Submissions';
                     break;
-                
+
                 case 'J1 QC Review':
                     this._awardState = 'J1QC';
                     break;
 
-                case 'Ready for Boarding': 
+                case 'Ready for Boarding':
                     this._awardState = 'Ready for Boarding';
                     break;
 
@@ -115,13 +122,14 @@ export class Award {
                 case 'Board Member 2 Review':
                 case 'Board Member 3 Review':
                 case 'Board Member 4 Review':
+                case 'Board Member 5 Review':   
                 case 'Board Member 6 Review':
                     this._awardState = 'Board Members';
                     break;
 
                 default:
-                    console.log('Unable to determine matrix status of this._awardStatus',this._awardStatus);
-                    this._awardState = 'Unkown';
+                    console.log('Unable to determine matrix status of this._awardStatus', this._awardStatus);
+                    this._awardState = 'Unknown';
 
             }
 
@@ -129,8 +137,8 @@ export class Award {
 
         }
 
-             
-    }
+
+    } //constructor
 
      get awardType() {
          return this._awardType;
@@ -197,10 +205,13 @@ export class Award {
 
 
         return moment.duration(completeDate.diff(acceptedDate)).as('days');
+      // return moment.duration(completeDate.diff(acceptedDate),'days');
     }
 
     get boardingDays() {
-        const boardStart = moment(this._dateStartBoarding,"YYYY-MM-DD");
+
+
+       const boardStart = moment(this._dateStartBoarding,"YYYY-MM-DD");
         const boardEnd = moment(this._dateCompleteBoarding,"YYYY-MM-DD");
 
         return moment.duration(boardEnd.diff(boardStart)).as('days');

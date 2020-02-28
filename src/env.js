@@ -1,12 +1,16 @@
 (function (window) {
   window.__env = window.__env || {};
 
-  // API url
-  window.__env.apiUrl = 'http://dev.your-api.com';
+  //Listweb
+  window.__env.listWeb = 'http://localhost:8080/sites/dev/socafdev/';
 
-  // Whether or not to enable debug mode
-  // Setting this to false will disable console output
-  window.__env.enableDebug = true;
+  //Doc library containg config file.  
+  window.__env.docLib = "AwardsApp";
 
-  window.__env.name = "Butthead";
+  //Config file name
+  window.__env.configFile = "config.txt";
+
+  //Path to configuration file
+  configPath =  'http://localhost:8080/sites/dev/socafdev/AwardsApp/config.txt';
+  
 }(this));

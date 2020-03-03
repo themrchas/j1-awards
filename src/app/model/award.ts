@@ -38,6 +38,9 @@ export class Award {
     //True if the award was completed in current year and completed date is not null
     private _useInMatrix: boolean;
 
+    //True if the award should be used in the In Progress awards
+    private _useInInprogress: boolean;
+
     //True if award has been completed in the past 12 months (default) and has a valid DateAccepted amd DateComplete.  These two items 
     //are required to calculate a 'days taken to process' metric
     private _useInChartComplete: boolean;
@@ -48,16 +51,22 @@ export class Award {
     //True if this award has a completion time in the past 12 months (defualt) and has a valid DateSentToQC and DateCompleteQC timestamp
     private _useInQCTimeChart: boolean;
 
+    //True is the award has organization or award selection criteria that is not complete. 
+    //This is determined in the data service component not not in the class;
+    private _ignoreAward; 
+
     
     constructor(rawAward: any) {
 
         console.log("Award: award constructor received", rawAward);
 
-        let currentYear = moment().format("YYYY")
+        let currentYear = moment().format("YYYY");
+
+       // this._ignoreAward = false;
 
         this._awardNumber = rawAward.Award_x0020_Number || null;
         this._awardType = rawAward.Award_x0020_Type || null;
-        this._awardSubType = rawAward.Award_x0020_SubType || null;
+        this._awardSubType = rawAward.Award_x0020_Subtype || null;
         this._organization = rawAward.SOCAF_x0020_Organization || null;
         this._subordinateUnit = rawAward.SOCAF_x0020_Subordinate_x0020_Un || null;
         this._awardStatus = rawAward.SAPS_x0020_Status || null;
@@ -80,10 +89,16 @@ export class Award {
         this._dateCompleteBoarding = (rawAward.Date_x0020_Boarding_x0020_Comple) ? moment(rawAward.Date_x0020_Boarding_x0020_Comple).format("YYYY-MM-DD") : null;
 
         //Award was completed in the current year and date completed has a value.  This award is considered 'Complete' for app purposes.
-        //and will be used in the matrix.
-        this._useInMatrix = (this._dateAwardComplete) && (moment().format("YYYY") == moment(this._dateAwardComplete).format("YYYY"));
+        //The suitability of the award to be used in the matrix is further defined in data.servce
+        this._useInMatrix = (this._dateAwardComplete) && (moment().format("YYYY") == moment(this._dateAwardComplete).format("YYYY") )
+              
+        this._useInInprogress = false;
 
-        //This award is to be used in the Complete Awards chart if has a valid complete and accepted date and completion date is less than/equal to a year old
+       //   this._useInMatrix = this.doUseInMatrix();
+
+        //This award is to be used in the Complete Awards chart if has a valid complete and accepted date and completion date is less than/equal to a year old.
+        //Screen out awards with organization set to 'Other' and suborg set to 'null'. This case is from user's faulty input.  Every 'Other' choice should have 
+        //a valid suborg chosen.
         this._useInChartComplete = (this._dateAwardComplete) && (this._dateAccepted) &&
             (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
 
@@ -108,14 +123,17 @@ export class Award {
                 case 'Accept for Action':
                 case 'Accept for Action - Resubmit':
                     this._awardState = 'New Submissions';
+                    this._useInInprogress = true;
                     break;
 
                 case 'J1 QC Review':
                     this._awardState = 'J1QC';
+                    this._useInInprogress = true;
                     break;
 
                 case 'Ready for Boarding':
                     this._awardState = 'Ready for Boarding';
+                    this._useInInprogress = true;
                     break;
 
                 case 'Board Member 1 Review':
@@ -125,10 +143,12 @@ export class Award {
                 case 'Board Member 5 Review':   
                 case 'Board Member 6 Review':
                     this._awardState = 'Board Members';
+                    this._useInInprogress = true;
                     break;
 
                 default:
-                    console.log('Unable to determine matrix status of this._awardStatus', this._awardStatus);
+                    console.error('Unable to determine matrix status of award id', this._awardNumber,'with award status',this._awardStatus);
+                    this._useInInprogress = true;
                     this._awardState = 'Unknown';
 
             }
@@ -178,6 +198,10 @@ export class Award {
         return this._useInMatrix;
     }
 
+    set useInMatrix(value:boolean) {
+        this._useInMatrix = value;
+    }
+
      get useInChartComplete() {
          return this._useInChartComplete
      }
@@ -188,7 +212,25 @@ export class Award {
 
       get useInQCTimeChart() {
          return this._useInQCTimeChart;
+
      }
+
+     get useInInprogress() {
+         return this._useInInprogress
+     }
+
+     set useInInprogress(value:boolean) {
+         this._useInInprogress = value;
+     }
+
+  //   get ignoreAward() {
+  //       return this._ignoreAward;
+  //   }
+
+
+ //    set ignoreAward(value:boolean) {
+  //       this._ignoreAward = value;
+  //   }
   
 
     getData(): string {
@@ -234,15 +276,5 @@ export class Award {
         return this._awardState;
     }
 
-    
-
-
-
      
-
-     
-
-      
-
-
 }

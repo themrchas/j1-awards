@@ -159,101 +159,167 @@ export class DataService {
  Creates a logical matrix of award counts, most importantly assigning '0' to any unit/award combinations not 
   found in the data pull.
 */
- analyzeAwardData(): Observable<any> {
+  analyzeAwardData(): Observable<any> {
 
-  let awardBreakDown: any = {};
+    let awardBreakDown: any = {};
+
+    //Any awards listed in the configProviderService 'miscAwards' property are awards that are to be collected into one metric
+    let configProviderMiscAwards: string = (this.configProviderService.config.miscAwards).join('|');
+    let miscAwardsRegEx = new RegExp(configProviderMiscAwards);
 
     this.configProviderService.config.doLog && console.log('raw data list after initial processing is', this._awardsForMatrix);
 
+    this.configProviderService.config.doLog && console.log('data.service.analyzeAwardData ignoring Other awards',this.configProviderService.config.ignoreOtherAwards);
+
+
+
     //Grab data identified as to be used in the matrix 
-    this._awardsForMatrix.filter(award => award.useInMatrix ).
-        forEach(function(processedAward) {
-  
-
-      let award: string = (processedAward.awardSubType !== null) ? processedAward.awardSubType : processedAward.awardType;
-
-      //Set the submitting unit
-      let unit: string = (processedAward.subOrganization !== null) ? processedAward.subOrganization : processedAward.organization;
-
-      //Create entry if either award type or award type + unit does not exit
-      if (!awardBreakDown[unit]) {
-          awardBreakDown[unit] = {};
-          awardBreakDown[unit][award] = 1;
-      }
-      else if (!awardBreakDown[unit][award])
-          awardBreakDown[unit][award] = 1;
-      else
-          awardBreakDown[unit][award] =  awardBreakDown[unit][award] + 1;
-
-
-   
-    //  Award.totalAwards++;
-
-  });
-
-console.log('analyzeAwardData: awardBreakDown is',awardBreakDown)
-console.log('3awardTypesList is',this.awardTypesList);
-
-//let awardTypesList = this.awardTypesList;
-
-//Any member of the cartesian product units x award types that is blank gets a 0
-//this.unitsList.forEach(function(unit) {
-  this.unitsList.forEach(unit => {
-
-  awardBreakDown[unit] = awardBreakDown[unit] || {};
-
-
-  this.awardTypesList.forEach(award =>  {
- // awardTypesList.forEach(function(award) {
-
-
-    //  if (!Award.awardBreakDown[unit][award])
-    awardBreakDown[unit][award] = awardBreakDown[unit][award] || 0;
-  })
-
-})
-
-
-//Initial count of various in-progress award states  'New Submissions', 'J1QC', etc.
-this.inProgressTypes.forEach(awardState => {
-  this.awardsInProcessing[awardState] = 0;
-   
-})
-
-//let awardsInProcessing = {};
- //Collate according to in processing type.  Non of these awards are used in the matrix calculations since they are still 'in progress'
-this._awardsForMatrix.filter(award => !award.useInMatrix ).
-      //  forEach(function(processedAward) {
+    this._awardsForMatrix.filter(award => doUseInMatrix(award,this.configProviderService.config.ignoreOtherAwards)).
         forEach(processedAward => {
 
-          //Collate according to in-processing type
-          //this.awardsInProcessing[processedAward.awardState] = (this.awardsInProcessing[processedAward.awardState]) ? this.awardsInProcessing[processedAward.awardState]++ : 1
-          this.awardsInProcessing[processedAward.awardState]++;
-         
-        });
+              let award: string = (processedAward.awardSubType != null) ? processedAward.awardSubType : processedAward.awardType;
 
-  //      this.awardsInProcessing = awardsInProcessing
-  this.awardBreakDown = awardBreakDown;
-  console.log('awardsInProcessing are',  this.awardsInProcessing);
+              //If we have a misc award, classify it as such
+              if (miscAwardsRegEx.test(award)) {
+                this.configProviderService.config.doLog && console.log("data.service.analyzeAwardData award number",processedAward.awardNumber,"using Misc for award type:",award);
+                award = "MISC";
 
-  //Grab total number of in progress awards
-  this.awardsInProcessing['Total'] = _.reduce(this.awardsInProcessing, function(result,val) {return result+val},0);
+              }
+                
 
-  //Break down completed awards over past 12 (default) months
-  this.categorizeCompletedAwards();
+        //Set the submitting unit
+        let unit: string = (processedAward.subOrganization != null) ? processedAward.subOrganization : processedAward.organization;
 
-  //Break down completed awards boarding stats over past 12 (defualt) months
-  this.categorizeBoardingCompletedAwards();
+        console.log('data.service.analyzeAwardData processing award with award type', award, 'unit is', unit, 'and processedAward is', processedAward);
 
-  this.categorizeQCCompletedAwards();
 
-  return Observable.create(observer => {
-   // observer.next('analyzeAward just emitted an an bservable')
-  // observer.next(Award.getAwardBreakdown())
-  observer.next(awardBreakDown)
+        //If 'Other' is chosen, there is supposed to be a suborganization chosen. If this is not the case, this award will be discarded with respect to all stats.
+      //  if (processedAward.organization == "Other" && processedAward.subOrganization == null)
+       //   console.error("data.service.analyzeAwardData organization is 'Other' but suborganization is 'null'.  Discarding this award since suborganization should have been chosen.");
+      //  else {
+
+          //Create entry if either award type or award type + unit does not exit
+          if (!awardBreakDown[unit]) {
+            awardBreakDown[unit] = {};
+            awardBreakDown[unit][award] = 1;
+          }
+          else if (!awardBreakDown[unit][award])
+            awardBreakDown[unit][award] = 1;
+          else
+            awardBreakDown[unit][award] = awardBreakDown[unit][award] + 1;
+
+       // }
+
+      });
+
+    console.log('analyzeAwardData: awardBreakDown is', awardBreakDown)
+    console.log('3awardTypesList is', this.awardTypesList);
+
+   
+    //Any member of the cartesian product units x award types that is blank gets a 0
+    //this.unitsList.forEach(function(unit) {
+    this.unitsList.forEach(unit => {
+
+      awardBreakDown[unit] = awardBreakDown[unit] || {};
+
+
+      this.awardTypesList.forEach(award => {
+        // awardTypesList.forEach(function(award) {
+
+
+        //  if (!Award.awardBreakDown[unit][award])
+        awardBreakDown[unit][award] = awardBreakDown[unit][award] || 0;
+      })
+
+    })
+
+
+    //Initial count of various in-progress award states  'New Submissions', 'J1QC', etc.
+    this.inProgressTypes.forEach(awardState => {
+      this.awardsInProcessing[awardState] = 0;
+
+    })
+
     
-    })    
- 
+    //Collate according to in processing type.  Non of these awards are used in the matrix calculations since they are still 'in progress'.
+    //As a general rule, any award not used in matrix is 'inprogress' minus any special cases flagged by award.ignoreAward
+    this._awardsForMatrix.filter(award => award.useInInprogress).
+      //  forEach(function(processedAward) {
+      forEach(processedAward => {
+
+        //Collate according to in-processing type
+        //this.awardsInProcessing[processedAward.awardState] = (this.awardsInProcessing[processedAward.awardState]) ? this.awardsInProcessing[processedAward.awardState]++ : 1
+        this.awardsInProcessing[processedAward.awardState]++;
+
+      });
+
+    
+    this.awardBreakDown = awardBreakDown;
+    console.log('awardsInProcessing are', this.awardsInProcessing);
+
+    //Grab total number of in progress awards
+    this.awardsInProcessing['Total'] = _.reduce(this.awardsInProcessing, function (result, val) { return result + val }, 0);
+
+    //Break down completed awards over past 12 (default) months
+    this.categorizeCompletedAwards();
+
+    //Break down completed awards boarding stats over past 12 (defualt) months
+    this.categorizeBoardingCompletedAwards();
+
+    this.categorizeQCCompletedAwards();
+
+    return Observable.create(observer => {
+      // observer.next('analyzeAward just emitted an an bservable')
+      // observer.next(Award.getAwardBreakdown())
+      observer.next(awardBreakDown)
+
+    })
+
+
+    //This function performs a secondary check on whether an award should be included in the 'Award Break Down' matrix.
+    //It is put here so that we can get access to user supplied 'Other' award sub award types that are included in the 
+    //config file and to be ignored.  This was not explicitly done in Award class definition in order to maintain a separation of concerns such that
+    //the Award class does not have the ConfigProviderService injected to get access to 'Other' award subtypes to ignore.
+    //
+    //In addition, the 'useInMatrix' property of the Award class  will be set to false as required.  This allows this property to be 
+    //used in other parts of the app.
+    function doUseInMatrix(award: Award, ignoreOtherAwardTypes:Array<string>): boolean {
+
+      let returnVal = award.useInMatrix;
+
+      //If the award is of type 'Other' weed out those subaward types that are not to appear in the Award Break Down matrix.
+      if (award.useInMatrix) {
+
+        //Convert the 'Other' award subtypes to a regex acceptable string
+        let toIgnore: string = ignoreOtherAwardTypes.join("|");
+
+        let regex = new RegExp(toIgnore);
+
+        //Do not use award in matrix stats if organization is 'Other' and sub org is not defined
+        if (award.organization == "Other" && award.subOrganization == null) {
+          console.error("Award",award.awardNumber,"has award organization 'Other' but no sub organization was chosen.  This award will be not be used in award matrix");
+          award.useInMatrix = false;
+          returnVal = false;
+        }
+        //Do not use in matrix stats if award type is 'Other' and no award sub type is chosen
+        else if (award.awardType == "Other" && !award.awardSubType) {
+          console.error("Award",award.awardNumber,"has award type 'Other' but no award subtype.  This award will be not be used in award matrix");
+          award.useInMatrix = false;
+          returnVal = false;
+        }
+        //Do not use in matrix stats if award type is 'Other' and award sub type is found in config file property 'ignoreOtherAwardTypes'
+        else if (award.awardType == "Other" && regex.test(award.awardSubType)) {
+          console.error("Award",award.awardNumber,"has award type 'Other' and award subtype '"+award.awardSubType+"' which is designated as not to be used in config file. This award will be not be used in award matrix");
+          award.useInMatrix = false;
+          returnVal = false;
+        }
+
+      }
+
+      return returnVal;
+
+    } //doUseInMatrix
+
   }  //analyzeAwardData
 
 
@@ -387,14 +453,15 @@ this._awardsForMatrix.filter(award => !award.useInMatrix ).
  //Return the count of awards used that have been identified to be used in matrix.
   public getTotalMatrixAwardsCount(): number {
     
-      return this.awardsForMatrix.filter(award => award.useInMatrix).length;
+    //  return this.awardsForMatrix.filter(award => award.useInMatrix).length;
+  return this.awardsForMatrix.filter(award => award.useInMatrix).length;
   }
 
 //Categorize any awards completed in the past 12 months.  12 months is the default based on data fetch.
 private categorizeCompletedAwards() {
 
 
-  this._awardsForMatrix.filter(award => award.useInChartComplete)
+  this._awardsForMatrix.filter(award => award.useInChartComplete )
     .forEach(award => {
 
       let monthYear = this.timeService.getDateFormatForChart(award.completionDate);
@@ -467,8 +534,6 @@ private categorizeBoardingCompletedAwards() {
 
 
   this.configProviderService.config.doLog && console.log('data.service.categorizeBoardingCompletedAwards: this.boardingCompletionTimesByMonth final', this.boardingCompletionTimesByMonth);
-
-
 
 
 } //categorizeBoardingCompletedAwards

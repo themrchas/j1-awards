@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 
 import { DataService } from './../../services/data.service';
 import { TimeService } from './../../services/time.service';
+import { ConfigProviderService } from './../../services/config-provider.service';
 
 
 import * as _ from 'lodash';
@@ -28,7 +29,11 @@ export class AwardTableComponent implements OnInit {
   matrixTitle: string;
 
 
-  constructor(private dataService: DataService, private timeService: TimeService) { }
+  //Replaces the 'MISC' label in the table. 'MISC' was used throughout app to aggregate the count of specific awards.
+  catchAllLabel: string;
+
+
+  constructor(private dataService: DataService, private timeService: TimeService, private configProviderSerice: ConfigProviderService) { }
 
   ngOnInit() {
 
@@ -36,6 +41,7 @@ export class AwardTableComponent implements OnInit {
     this.awardBreakDown = this.dataService.awardBreakDown;
 
     console.log('award-table.component: Award breakdown is', this.awardBreakDown);
+
     this.unitsList = this.dataService.unitsList;
 
     this.awardTypes = this.dataService.awardTypesList;
@@ -43,6 +49,8 @@ export class AwardTableComponent implements OnInit {
     this.awardCount = this.dataService.getTotalMatrixAwardsCount();
 
     this.matrixTitle = this.timeService.getCurrentPhysicalYear()+" Award Break Down"
+
+    this.catchAllLabel = (this.configProviderSerice.config.miscAwards).join("/");
 
     
   } //ngOnInit

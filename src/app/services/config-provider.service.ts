@@ -27,7 +27,7 @@ export class ConfigProviderService {
      .pipe (
               tap(val => { console.log('config-provider.service.getConfiguration tap: Http call returned', val);
                             this._config = val;
-                          })
+                 })
           
             ) 
 

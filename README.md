@@ -31,3 +31,44 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
  ##Angular environmental variable strategy that can be used so that you don't have rebuild an app just to change a few variables.
  /environments/environment.###.ts files can be useful for various builds, but using environmental variables allows you to change
  data on the fly in place.    https://www.jvandemo.com/how-to-use-environment-variables-to-configure-your-angular-application-without-a-rebuild/
+
+ ## Pathological cases:
+
+ Organization 'Other' with no sub-org selected
+	Award identified as complete:
+		-not used in matrix
+		-not used in in-progress
+		-used in charts based on criteria
+
+	Award identified as in-progress
+		-not used in matrix
+		-used in in-progress
+		-not used in charts
+
+Award type 'Other' with no award sub-type
+	Award identified as complete:
+		-not used in matrix
+		-not used in in-progress
+		-used in charts based on criteria
+
+
+	Award identified as in-progress
+		-not used in matrix
+		-used in in-progress
+		-not used in chart based criteria
+
+Award type 'Other' and award is identified as sub-type not to use in matrix
+		
+Award identified as complete:
+		-not used in matrix
+		-not used in in-progress
+		-used in charts based on criteria
+
+
+	Award identified as in-progress
+		-not used in matrix
+		-used in in-progress
+		-not used in chart based criteria
+
+
+

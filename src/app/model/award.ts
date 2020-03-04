@@ -51,18 +51,11 @@ export class Award {
     //True if this award has a completion time in the past 12 months (defualt) and has a valid DateSentToQC and DateCompleteQC timestamp
     private _useInQCTimeChart: boolean;
 
-    //True is the award has organization or award selection criteria that is not complete. 
-    //This is determined in the data service component not not in the class;
-    private _ignoreAward; 
-
-    
     constructor(rawAward: any) {
 
         console.log("Award: award constructor received", rawAward);
 
         let currentYear = moment().format("YYYY");
-
-       // this._ignoreAward = false;
 
         this._awardNumber = rawAward.Award_x0020_Number || null;
         this._awardType = rawAward.Award_x0020_Type || null;
@@ -92,13 +85,10 @@ export class Award {
         //The suitability of the award to be used in the matrix is further defined in data.servce
         this._useInMatrix = (this._dateAwardComplete) && (moment().format("YYYY") == moment(this._dateAwardComplete).format("YYYY") )
               
+        //STrue if the award is used in the in-progress stats
         this._useInInprogress = false;
 
-       //   this._useInMatrix = this.doUseInMatrix();
-
         //This award is to be used in the Complete Awards chart if has a valid complete and accepted date and completion date is less than/equal to a year old.
-        //Screen out awards with organization set to 'Other' and suborg set to 'null'. This case is from user's faulty input.  Every 'Other' choice should have 
-        //a valid suborg chosen.
         this._useInChartComplete = (this._dateAwardComplete) && (this._dateAccepted) &&
             (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
 
@@ -222,16 +212,6 @@ export class Award {
      set useInInprogress(value:boolean) {
          this._useInInprogress = value;
      }
-
-  //   get ignoreAward() {
-  //       return this._ignoreAward;
-  //   }
-
-
- //    set ignoreAward(value:boolean) {
-  //       this._ignoreAward = value;
-  //   }
-  
 
     getData(): string {
         return this._awardNumber+"  "+this._dateAccepted;

@@ -13,7 +13,7 @@
   </thead>
   <tbody>
     <tr mdbTableCol *ngFor="let award of awardTypes">
-      <th scope="row">{{award == "MISC" ? catchAllLabel : award}}</th>
+      <th scope="row" [class.misc]="award == 'MISC'">{{award == "MISC" ? catchAllLabel : award}}</th>
     
       <td *ngFor="let unit of unitsList">{{awardBreakDown[unit][award]}}</td>
     

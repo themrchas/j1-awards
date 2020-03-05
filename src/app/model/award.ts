@@ -103,8 +103,11 @@ export class Award {
 
 
         //If the award is not complete, then that means that it is currently in some state of the awards process per the data pull filter
-        //Need to verify 'CMD GRP', 'J1 Final Stages', and 'Mailed this week' with J1
-        if (!this._useInMatrix) {
+        //
+        //In the case of 'Ready for Distribution', these are awards that have a complete timestamp and are tracked in the in-progress tables.  As such, these 
+        // awards will show up in both matrix and inprogress table.
+
+        if (this._awardStatus == 'Ready for Distribution' || !this._useInMatrix) {
 
             switch (this._awardStatus) {
 
@@ -117,6 +120,7 @@ export class Award {
                     break;
 
                 case 'J1 QC Review':
+                case 'SJS QC Review':
                     this._awardState = 'J1QC';
                     this._useInInprogress = true;
                     break;
@@ -136,8 +140,18 @@ export class Award {
                     this._useInInprogress = true;
                     break;
 
+                case 'Pending CG Signature':
+                    this._awardState = 'CMD GRP';   
+                    this._useInInprogress = true;
+                    break;
+
+                case 'Ready for Distribution':
+                    this._awardState = 'J1 Final Stages';
+                    this._useInInprogress = true;
+                    break;
+
                 default:
-                    console.error('Unable to determine matrix status of award id', this._awardNumber,'with award status',this._awardStatus);
+                    console.error("Unable to determine matrix status of award id'", this._awardNumber,"'with award status'",this._awardStatus,"'");
                     this._useInInprogress = true;
                     this._awardState = 'Unknown';
 

@@ -1,10 +1,11 @@
-import { Component, OnInit, Input } from '@angular/core';
-//import { DataService } from './../../services/data.service';
-//import { DataService } from './../../services/data.service';
+import { Component, OnInit, Input, ViewChild } from '@angular/core';
 
-//import { ChartsModule} from 'ng2-charts';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
-//import { Award } from './../../model/award';
+//import $ from 'jquery';
+
+
+
 
 @Component({
   selector: 'app-charts',
@@ -14,12 +15,15 @@ import { Component, OnInit, Input } from '@angular/core';
 export class ChartsComponent implements OnInit {
  // export class ChartsComponent {
 
+  @ViewChild("test", {static: true}) test: any;
+
  
   @Input() chartLabels: Array<string>;
   @Input() chartData: Object;
   @Input() legend: string;
+  @Input() chartDescription: string;
 
-  
+  isCollapsed: boolean = true;
   
   lineChartType: string = "line"
 
@@ -32,11 +36,10 @@ export class ChartsComponent implements OnInit {
   options = {
     legend: { display:true, position:"bottom",
               labels: {boxWidth:0, fontSize:16}
-         },
+         }
     
 
-
-   }
+   } //options
 
 
   constructor() { }
@@ -50,7 +53,27 @@ export class ChartsComponent implements OnInit {
  
   this.chartDataToDisplay = [{ data: this.chartData , label:this.legend, fill: false, borderColor: "#858481" }]
  
+ } //ngOnInit
+
+
+ //Allows the chart information to be turned on/off.
+ toggle() : void {
+
+     if (this.isCollapsed)
+          this.test.show();
+     else
+      this.test.hide();
+     
+     this.isCollapsed = !this.isCollapsed;
+    
  }
+
+
+ ngAfterViewInit() {
+  
+  this.test.hide();
+}
+
 
   
   

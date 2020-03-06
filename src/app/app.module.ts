@@ -17,6 +17,9 @@ import { DisplayColTotalPipe } from './pipes/display-col-total.pipe';
 
 import { EnvServiceProvider } from './services/env.service.provider';
 
+//import { CollapseComponenty } from './components/collapse/collapse.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 export function dataProviderFactory(provider: DataProviderService) {
   return () => provider.load();
 }
@@ -28,14 +31,19 @@ export function dataProviderFactory(provider: DataProviderService) {
     AwardTableComponent,
     InProgressComponent,
     DisplayRowTotalPipe,
-    DisplayColTotalPipe
+    DisplayColTotalPipe,
+   // BrowserAnimationsModule
+   // CollapseComponent
+    
     
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     MDBBootstrapModule.forRoot(),
-    ChartsModule
+    ChartsModule,
+    BrowserAnimationsModule
+   
   ],
   providers: [EnvServiceProvider,
     DataProviderService, 

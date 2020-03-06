@@ -12,6 +12,8 @@
       <div class="row">
         <div class="col-8 offset-2 text-center">
           Award Completion Data
+               
+          <i class="far fa-arrow-alt-circle-right"></i>
         </div>
       </div>
     </div>
@@ -19,20 +21,20 @@
 
     <div class="row mt-5">
       <div class="col-8 offset-2">
-          <app-charts [chartLabels]="chartLabels" [chartData]="awardCompleteChartData" [legend]="chartLegends.complete"></app-charts>
+          <app-charts [chartLabels]="chartLabels" [chartData]="awardCompleteChartData" [legend]="chartLegends.complete" [chartDescription]="chartDescriptions.complete"></app-charts>
+      </div>
+    </div>
+   <div class="row mt-5">
+      <div class="col-8 offset-2">
+            <app-charts [chartLabels]="chartLabels" [chartData]="awardBoardingChartData" [legend]="chartLegends.boarding" [chartDescription]="chartDescriptions.boarding" ></app-charts>
       </div>
     </div>
     <div class="row mt-5">
       <div class="col-8 offset-2">
-            <app-charts [chartLabels]="chartLabels" [chartData]="awardBoardingChartData" [legend]="chartLegends.boarding"></app-charts>
+            <app-charts [chartLabels]="chartLabels" [chartData]="awardQCChartData" [legend]="chartLegends.qc" [chartDescription]="chartDescriptions.qc"></app-charts>
       </div>
-    </div>
-    <div class="row mt-5">
-      <div class="col-8 offset-2">
-            <app-charts [chartLabels]="chartLabels" [chartData]="awardQCChartData" [legend]="chartLegends.qc"></app-charts>
-      </div>
-    </div>
-</div>
+    </div> 
+</div> 
 
 
 

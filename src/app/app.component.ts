@@ -2,7 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { environment } from './../environments/environment';
 //import { ChartsComponent } from './components/charts.component'
 import {DataService} from './services/data.service';
+
 //import {ConfigProviderService} from  './services/config-provider.service';
+
+
+import { ChartsComponent } from './components/charts/charts.component';
 
 
 @Component({
@@ -11,9 +15,8 @@ import {DataService} from './services/data.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit{
-  title = 'j1-charts';
 
- 
+  
   chartData : Object;
   chartLabels;
 
@@ -35,6 +38,12 @@ export class AppComponent implements OnInit{
  
  //Chart legends
   chartLegends = {complete:"Award Average Days To Completion", boarding:"Award Boarding Days To Completion", qc:"Award QC Days To Completion"};
+
+
+  //Chart descriptions
+  chartDescriptions = {complete:"Average time in days of all awards having a valid accepted and completed timestamp in which the completed date is within the past year.",
+                       boarding:"Average time in days of all complete awards having a valid boarding start and end date in which the completed date is within the past year",
+                       qc:"Average time in days of all complete awards having a valid QC start and end date in which the completed date is within the past year"}
 
 
   constructor(private dataService: DataService) { }
@@ -83,4 +92,5 @@ export class AppComponent implements OnInit{
 
   } //ngOnInit
 
+  
 } //AppComponent

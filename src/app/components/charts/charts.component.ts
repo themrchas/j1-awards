@@ -23,6 +23,11 @@ export class ChartsComponent implements OnInit {
   @Input() legend: string;
   @Input() chartDescription: string;
 
+  rightArrowIcon: string = "\uf35a";
+  leftArrowIcon:string  = "\uf359";
+
+  arrowIcon: string = this.rightArrowIcon;
+ 
   isCollapsed: boolean = true;
   
   lineChartType: string = "line"
@@ -59,10 +64,14 @@ export class ChartsComponent implements OnInit {
  //Allows the chart information to be turned on/off.
  toggle() : void {
 
-     if (this.isCollapsed)
+     if (this.isCollapsed) {
+          this.arrowIcon = this.leftArrowIcon;
           this.test.show();
-     else
+     }
+     else {
       this.test.hide();
+      this.arrowIcon = this.rightArrowIcon;
+     }
      
      this.isCollapsed = !this.isCollapsed;
     

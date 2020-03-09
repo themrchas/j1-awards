@@ -1,3 +1,30 @@
 .about  {
     border: 1px dashed black;
 }
+
+//$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
+//@import "~@fortawesome/fontawesome-free/scss/fontawesome.scss";
+//@import "~@fortawesome/fontawesome-free/scss/solid.scss";
+
+   
+//Have button line up with left edge of chart
+button {
+    padding-left: 0px;
+}
+
+    button:before {
+        font-family: 'Font Awesome 5 Free';
+       content: attr(data-icon);
+      
+      }
+
+      span:before {
+        font-family: 'Font Awesome 5 Free';
+      
+       content: attr(data-icon);
+      }
+
+      a:link {
+        text-decoration: none;
+      }
+

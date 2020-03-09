@@ -41,9 +41,9 @@ export class AppComponent implements OnInit{
 
 
   //Chart descriptions
-  chartDescriptions = {complete:"Average time in days of all awards having a valid accepted and completed timestamp in which the completed date is within the past year.",
-                       boarding:"Average time in days of all complete awards having a valid boarding start and end date in which the completed date is within the past year",
-                       qc:"Average time in days of all complete awards having a valid QC start and end date in which the completed date is within the past year"}
+  chartDescriptions = {complete:"Average time (in days) of all awards having a valid accepted and completed date and the completed date is within the past year.",
+                       boarding:"Average time (in days) of all complete awards having a valid boarding start and boarding end date and the completed date is within the past year",
+                       qc:"Average time (in days) of all complete awards having a valid QC start and QC end date andthe completed date is within the past year"}
 
 
   constructor(private dataService: DataService) { }

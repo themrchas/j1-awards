@@ -31,9 +31,8 @@ export function dataProviderFactory(provider: DataProviderService) {
     AwardTableComponent,
     InProgressComponent,
     DisplayRowTotalPipe,
-    DisplayColTotalPipe,
-   // BrowserAnimationsModule
-   // CollapseComponent
+    DisplayColTotalPipe
+   
     
     
   ],

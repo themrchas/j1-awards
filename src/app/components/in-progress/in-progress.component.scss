@@ -8,3 +8,17 @@
     margin-bottom: 15px;
 }
 
+#in-progress {
+    border: solid 2px #d9d9d9;
+}
+
+button {
+    padding-left: 0px;
+}
+
+.btn-open-modal:before {
+    font-family: 'Font Awesome 5 Free';
+   content: attr(data-icon);
+   margin-right: 2px;
+  
+  }

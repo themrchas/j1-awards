@@ -19,6 +19,9 @@ import { EnvServiceProvider } from './services/env.service.provider';
 
 //import { CollapseComponenty } from './components/collapse/collapse.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ModalComponent } from './components/modal/modal.component';
+
+import { NgbModalModule } from  '@ng-bootstrap/ng-bootstrap';
 
 export function dataProviderFactory(provider: DataProviderService) {
   return () => provider.load();
@@ -31,9 +34,10 @@ export function dataProviderFactory(provider: DataProviderService) {
     AwardTableComponent,
     InProgressComponent,
     DisplayRowTotalPipe,
-    DisplayColTotalPipe
-   
+    DisplayColTotalPipe,
+    ModalComponent
     
+      
     
   ],
   imports: [
@@ -41,7 +45,8 @@ export function dataProviderFactory(provider: DataProviderService) {
     HttpClientModule,
     MDBBootstrapModule.forRoot(),
     ChartsModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    NgbModalModule
    
   ],
   providers: [EnvServiceProvider,

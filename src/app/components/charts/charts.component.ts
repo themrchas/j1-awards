@@ -13,7 +13,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
   styleUrls: ['./charts.component.scss']
 })
 export class ChartsComponent implements OnInit {
- // export class ChartsComponent {
+
 
   @ViewChild("test", {static: true}) test: any;
 

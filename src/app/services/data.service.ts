@@ -52,7 +52,20 @@ export class DataService {
 
 
   //Categories for awards that are not complete and in some state of processing
-  private _inProgressTypes = ["New Submissions", "J1QC", "Ready for Boarding", "Board Members", "CMD GRP", "J1 Final Stages", "Unknown", "Total"]
+  private _inProgressTypes = ["New Submissions", "J1QC", "Ready for Boarding", "Board Members", "CMD GRP", "J1 Final Stages", "Mailed this Week", "Unknown", "Total"];
+
+  private _inProgressDescriptions = {
+    "New Submissions": "Awards Pending Review, Pending Review (Resubmit), Accept for Action, Accept for Action - Resubmit, ReQC (Anything in New and J1 Button",
+    "J1QC": "Awards in J1 QC or SJS QC state",
+    "Ready for Boarding": "Awards ready to be boarded",
+    "Board Members" : "Awards currently in boarding process and assigned to a board member",
+    "CMD GRP": "Awards in which boarding is complete and waiting for CG's signature",
+    "J1 Final Stages": "Complted awards awaiting distribution",
+    "Mailed this Week" : "Awards that have been mailed in the current week and have been archived",
+    "Unknown": "Awards that do not fall into a category above",
+    "Total" : "Total number of awards above"
+
+  }; 
 
   get awardTypesList() {
     return this._awardTypesList;
@@ -126,6 +139,10 @@ export class DataService {
 
   get inProgressTypes() {
     return this._inProgressTypes;
+  }
+
+  get inProgressDescriptions() {
+    return this._inProgressDescriptions;
   }
 
 

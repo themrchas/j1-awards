@@ -11,7 +11,7 @@ import { NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap'
 })
 export class InProgressComponent implements OnInit {
 
-  //@ViewChild("test1", {static: true}) test1: any;
+ 
 
   //Categories of awards to be displayed in the table
  inProgressTypes: Array<string>;

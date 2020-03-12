@@ -85,7 +85,7 @@ export class Award {
         //The suitability of the award to be used in the matrix is further defined in data.servce
         this._useInMatrix = (this._dateAwardComplete) && (moment().format("YYYY") == moment(this._dateAwardComplete).format("YYYY") )
               
-        //STrue if the award is used in the in-progress stats
+        //True if the award is used in the in-progress stats
         this._useInInprogress = false;
 
         //This award is to be used in the Complete Awards chart if has a valid complete and accepted date and completion date is less than/equal to a year old.
@@ -151,7 +151,7 @@ export class Award {
                     break;
 
                 default:
-                    console.error("Unable to determine matrix status of award id'", this._awardNumber,"'with award status'",this._awardStatus,"'");
+                    console.error("Unable to determine matrix status of award id '"+this._awardNumber+"'with award status '"+this._awardStatus+"'. This will be categorized as 'Unkown' in 'Award Tracker' in progress awards table.");
                     this._useInInprogress = true;
                     this._awardState = 'Unknown';
 

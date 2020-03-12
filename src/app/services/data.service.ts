@@ -33,6 +33,7 @@ export class DataService {
 
   //Contains a breakdown of awards that are currently in some step of processing and are not counted in the matrix stats.
   //This info is categorized as 'New Submissions', 'J1QC', 'Ready for Boarding', etc.
+  //Note that this can include awards that are not used in 'Award Break Down' matrix (via config file 'variable' ignoreOtherAwards )
   private _awardsInProcessing: Object = {};
 
   //Object consiting of 'Month Year' (MMM YYYY) as key and properties  { "Jan 2001": { completeCount:5, completionDays:4 } }
@@ -55,15 +56,15 @@ export class DataService {
   private _inProgressTypes = ["New Submissions", "J1QC", "Ready for Boarding", "Board Members", "CMD GRP", "J1 Final Stages", "Mailed this Week", "Unknown", "Total"];
 
   private _inProgressDescriptions = {
-    "New Submissions": "Awards Pending Review, Pending Review (Resubmit), Accept for Action, Accept for Action - Resubmit, ReQC (Anything in New and J1 Button",
-    "J1QC": "Awards in J1 QC or SJS QC state",
-    "Ready for Boarding": "Awards ready to be boarded",
-    "Board Members" : "Awards currently in boarding process and assigned to a board member",
-    "CMD GRP": "Awards in which boarding is complete and waiting for CG's signature",
-    "J1 Final Stages": "Complted awards awaiting distribution",
-    "Mailed this Week" : "Awards that have been mailed in the current week and have been archived",
-    "Unknown": "Awards that do not fall into a category above",
-    "Total" : "Total number of awards above"
+    "New Submissions": "Awards Pending Review, Pending Review (Resubmit), Accept for Action, Accept for Action - Resubmit, ReQC (Anything in New and J1 Button).",
+    "J1QC": "Awards in J1 QC or SJS QC state.",
+    "Ready for Boarding": "Awards ready to be boarded.",
+    "Board Members" : "Awards currently in boarding process and assigned to a board member.",
+    "CMD GRP": "Awards in which boarding is complete and waiting for CG's signature.",
+    "J1 Final Stages": "Completed awards awaiting distribution.",
+    "Mailed this Week" : "Awards that have been mailed in the current week and have been archived.",
+    "Unknown": "Awards that do not fall into a category above. This is based on award status in supporting SharePoint list.",
+    "Total" : "Total number of awards above."
 
   }; 
 
@@ -287,26 +288,29 @@ export class DataService {
       //Convert the 'Other' award subtypes to a regex acceptable string
       let toIgnore: string = ignoreOtherAwardTypes.join("|");
 
+      //These awards will not be included in the matrix
       let regexIgnore = new RegExp(toIgnore);
 
-      let regexNonAlphaNumeric = /\W/;
+      //Used to screen award sub types which are blank
+      //let regexNonAlphaNumeric = /\W/;
+      let regexNonAlphaNumeric = /^\W*$/;
 
       //Do not use award in matrix stats if organization is 'Other' and sub org is not defined
       if (award.organization == "Other" && award.subOrganization == null) {
-        console.error("Award '" + award.awardNumber + "' has award organization 'Other' but no sub organization was chosen.  This award will be not be used in award matrix stats.");
+        console.error("Award '" + award.awardNumber + "' has award organization 'Other' but no sub organization was chosen.  This award will be not be used in Award Break Down matrix (if applicable).");
         award.useInMatrix = false;
         returnVal = false;
       }
       //Do not use in matrix stats if award type is 'Other' and no award sub type is chosen
-      //The match("") is put in to take care of any choice column that is empty but not null
+      //The match("") is put in to take care of any choice column that is empty but not null (like a space)
       else if (award.awardType == "Other" && (!award.awardSubType || award.awardSubType.match(regexNonAlphaNumeric))) {
-        console.error("Award '" + award.awardNumber + "' has award type 'Other' but no or empty award subtype. This award will be not be used in award matrix stats.");
+        console.error("Award '" + award.awardNumber + "' has award type 'Other' but no or empty award subtype. This award will be not be used in Award Break Down matrix (if applicable).");
         award.useInMatrix = false;
         returnVal = false;
       }
       //Do not use in matrix stats if award type is 'Other' and award sub type is found in config file property 'ignoreOtherAwardTypes'
       else if (award.awardType == "Other" && (regexIgnore.test(award.awardSubType))) {
-        console.error("Award '" + award.awardNumber + "' has award type 'Other' and award subtype '" + award.awardSubType + "' which is designated as not to be used in config file. This award will be not be used in award matrix stats.");
+        console.error("Award '" + award.awardNumber + "' has award type 'Other' and award subtype '" + award.awardSubType + "' which is designated as not to be used in config file. This award will be not be used in Award Break Down matrix (if applicable).");
         award.useInMatrix = false;
         returnVal = false;
       }

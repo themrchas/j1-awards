@@ -39,7 +39,7 @@ export class TimeService {
     return moment(baseDate).subtract(1,'years').toISOString();
   }
 
-  //Return a string dtae in the format 'Jan 2019' / 'MMM YYYY'
+  //Return a string date in the format 'Jan 2019' / 'MMM YYYY'
   getDateFormatForChart(date:string): string {
       return moment(date).format("MMM YYYY");
   }
@@ -49,7 +49,7 @@ export class TimeService {
     return moment().format("YYYY");
   }
 
-  
+
 
 
 } //TimeService

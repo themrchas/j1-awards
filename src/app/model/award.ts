@@ -1,6 +1,7 @@
 
 
 import * as moment from 'moment';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 export class Award {
 
@@ -35,6 +36,8 @@ export class Award {
     private _dateToHRC: string;
     private _dateToSOCOM: string;
 
+    private _dateMailed: string;
+
     //True if the award was completed in current year and completed date is not null
     private _useInMatrix: boolean;
 
@@ -50,6 +53,10 @@ export class Award {
 
     //True if this award has a completion time in the past 12 months (defualt) and has a valid DateSentToQC and DateCompleteQC timestamp
     private _useInQCTimeChart: boolean;
+
+    //True if the the award has a 'Date Mailed' timestamp entry within the past ??7 day or week?? 
+    private _mailedThisWeek: boolean;
+    
 
     constructor(rawAward: any) {
 
@@ -81,6 +88,9 @@ export class Award {
         this._dateStartBoarding = (rawAward.DateSentToBoarding) ? moment(rawAward.DateSentToBoarding).format("YYYY-MM-DD") : null;
         this._dateCompleteBoarding = (rawAward.Date_x0020_Boarding_x0020_Comple) ? moment(rawAward.Date_x0020_Boarding_x0020_Comple).format("YYYY-MM-DD") : null;
 
+        //Date mailed
+        this._dateMailed = (rawAward.DateMailed) ?  moment(rawAward.DateMailed).format("YYYY-MM-DD") : null;
+
         //Award was completed in the current year and date completed has a value.  This award is considered 'Complete' for app purposes.
         //The suitability of the award to be used in the matrix is further defined in data.servce
         this._useInMatrix = (this._dateAwardComplete) && (moment().format("YYYY") == moment(this._dateAwardComplete).format("YYYY") )
@@ -101,13 +111,17 @@ export class Award {
         this._useInQCTimeChart = (this._dateAwardComplete) && (this._dateSentToQC) && (this._dateCompleteQC) &&
             (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
 
+        //This award will be counted in the in-progress stats as 'Mailed this Week' if 'Date Mailed' is within past ?7 days or week? 
+        this._mailedThisWeek = (this._dateMailed) && (moment().diff(moment(this._dateMailed),'days') <= 7); 
+
 
         //If the award is not complete, then that means that it is currently in some state of the awards process per the data pull filter
         //
         //In the case of 'Ready for Distribution', these are awards that have a complete timestamp and are tracked in the in-progress tables.  As such, these 
-        // awards will show up in both matrix and inprogress table.
-
-        if (this._awardStatus == 'Ready for Distribution' || !this._useInMatrix) {
+        // awards will show up in both matrix and in-progress table. Awards that have been mailed this week must have an award status of 'Archived' per J1.
+        //Note that awards that have been 'mailedThisWeek' can appear both in matrix as well as in-progress tables since they are 'Complete' but still being worked by J1.
+        
+        if (this._awardStatus == 'Ready for Distribution' || !this._useInMatrix || this._mailedThisWeek) {
 
             switch (this._awardStatus) {
 
@@ -151,10 +165,18 @@ export class Award {
                     break;
 
                 default:
-                    console.error("Unable to determine matrix status of award id '"+this._awardNumber+"'with award status '"+this._awardStatus+"'. This will be categorized as 'Unkown' in 'Award Tracker' in progress awards table.");
+                    //Grab awards that have completed this week but don't have 'Award Status'of 'Ready for Distribution' ==> These should only be be 'Archived' awards.
+                    if (this._mailedThisWeek && this._awardStatus == "Archived") {
+                        this._awardState = 'Mailed this Week'; 
+                    }
+                    //Unkown award type
+                    else {
+                        console.error("Unable to determine matrix status of award id '"+this._awardNumber+"'with award status '"+this._awardStatus+"'. This will be categorized as 'Unkown' in 'Award Tracker' in progress awards table.");
+                        this._awardState = 'Unknown';
+                    }
+                
                     this._useInInprogress = true;
-                    this._awardState = 'Unknown';
-
+                  
             }
 
 
@@ -197,7 +219,7 @@ export class Award {
          return this._dateCompleteBoarding
      }
 
-      //Returns true if an award should be used in matrix calculations
+    //Returns true if an award should be used in matrix calculations
     get useInMatrix(): boolean {
         return this._useInMatrix;
     }

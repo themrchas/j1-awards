@@ -25,7 +25,7 @@ export class InProgressComponent implements OnInit {
 
  closeResult: string;
 
-  constructor(private dataService:DataService,private modalService: NgbModal ) { }
+  constructor(private dataService:DataService, private modalService: NgbModal ) { }
 
   
   ngOnInit() {

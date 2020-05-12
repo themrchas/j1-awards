@@ -3,6 +3,8 @@
 import * as moment from 'moment';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
+import { TimeService } from "../services/time.service";
+
 export class Award {
 
   
@@ -58,8 +60,9 @@ export class Award {
     private _mailedThisWeek: boolean;
     
 
-    constructor(rawAward: any) {
-
+   // constructor(rawAward: any) {
+    constructor(rawAward: any, timeService: TimeService) {
+        
         console.log("Award: award constructor received", rawAward);
 
         let currentYear = moment().format("YYYY");
@@ -100,19 +103,26 @@ export class Award {
 
         //This award is to be used in the Complete Awards chart if has a valid complete and accepted date and completion date is less than/equal to a year old.
         this._useInChartComplete = (this._dateAwardComplete) && (this._dateAccepted) &&
-            (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
+          //  (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
+          (timeService.dateIsInTrailingYearInterval(this._dateAwardComplete));
 
         //This award to be used in the Boarding Time chart if time difference between completed award date and now is less than a year
         this._useInBoardingTimeChart = (this._dateAwardComplete) && (this._dateStartBoarding) && (this._dateCompleteBoarding) &&
-            (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
+         //   (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
+         (timeService.dateIsInTrailingYearInterval(this._dateAwardComplete));
 
         //This award to be used in the QC chart if time difference between completed award date and now is less than a year and both 
         //_dateSentToQC and _date CompleteQC are defined
         this._useInQCTimeChart = (this._dateAwardComplete) && (this._dateSentToQC) && (this._dateCompleteQC) &&
-            (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
+         //   (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
+            (timeService.dateIsInTrailingYearInterval(this._dateAwardComplete));
 
-        //This award will be counted in the in-progress stats as 'Mailed this Week' if 'Date Mailed' is within past ?7 days or week? 
-        this._mailedThisWeek = (this._dateMailed) && (moment().diff(moment(this._dateMailed),'days') <= 7); 
+        /* This award will be counted in the in-progress stats as 'Mailed previous Week'.
+         * The criteria is as follows: Target briefing date is every Monday. This metric will look back from previous Monday 
+         * through last Sunday.  Example: Briefing date is 5/11/2020, so we include any awards that have been marked mailed between
+         * (and including) 5/4/2020 - 5/10/2020.
+         */
+         this._mailedThisWeek = (this._dateMailed) && timeService.dateIsInPreviousWeekInterval(this._dateMailed); 
 
 
         //If the award is not complete, then that means that it is currently in some state of the awards process per the data pull filter
@@ -129,6 +139,7 @@ export class Award {
                 case 'Pending Review (Resubmit)':
                 case 'Accept for Action':
                 case 'Accept for Action - Resubmit':
+                case 'Accept for Action - ReQC':
                     this._awardState = 'New Submissions';
                     this._useInInprogress = true;
                     break;
@@ -154,8 +165,20 @@ export class Award {
                     this._useInInprogress = true;
                     break;
 
+                case 'Boarding Complete':
+                    this._awardState = 'Boarding Complete';
+                    this._useInInprogress = true;
+                    break;
+
+
                 case 'Pending CG Signature':
                     this._awardState = 'CMD GRP';   
+                    this._useInInprogress = true;
+                    break;
+
+                case 'With HRC':
+                case 'With SOCOM':
+                    this._awardState = 'With SOCOM/HRC';
                     this._useInInprogress = true;
                     break;
 
@@ -165,17 +188,27 @@ export class Award {
                     break;
 
                 default:
-                    //Grab awards that have completed this week but don't have 'Award Status'of 'Ready for Distribution' ==> These should only be be 'Archived' awards.
+                    //Grab awards that have been mailed the previous week but don't have 'Award Status' of 'Ready for Distribution' ==> These should only be be 'Archived' awards, but put this in just in case.
                     if (this._mailedThisWeek && this._awardStatus == "Archived") {
-                        this._awardState = 'Mailed this Week'; 
+                        this._awardState = 'Mailed Previous Week'; 
+                        this._useInInprogress = true;
                     }
-                    //Unkown award type
-                    else {
-                        console.error("Unable to determine matrix status of award id '"+this._awardNumber+"'with award status '"+this._awardStatus+"'. This will be categorized as 'Unkown' in 'Award Tracker' in progress awards table.");
+                    /* Unkown award type.  If we reach this condition and the award is 'Archived', it is most likely an award that was set to 'Complete' 
+                     * in a previous year. We can ignore these 'Archived' awards as they should not show up in current year matrix and are not 'in progress'.
+                     */
+                     else if (this._awardStatus != 'Archived') {
+                        console.error("Unable to determine matrix status of award id '"+this._awardNumber+"' with award status '"+this._awardStatus+"'. This will be categorized as 'Unkown' in 'Award Tracker' in progress awards table.");
                         this._awardState = 'Unknown';
+                        this._useInInprogress = true;
+                    }
+                    /* This award does not meet any criteria to include in the in-progress metrics.
+                    * This could be, for example, an award that is 'Complete' in a previous year and should therefore simply be ignored.
+                    */
+                    else {
+                        console.log("Ignoring the award with id '"+this._awardNumber+"' with award status '"+this._awardStatus+"' This award does not meet any of the criteria to include in 'Award Tracker' or 'Award Breakdown'  metrics." );
                     }
                 
-                    this._useInInprogress = true;
+                    
                   
             }
 
@@ -263,7 +296,7 @@ export class Award {
 
 
         return moment.duration(completeDate.diff(acceptedDate)).as('days');
-      // return moment.duration(completeDate.diff(acceptedDate),'days');
+      
     }
 
     get boardingDays() {

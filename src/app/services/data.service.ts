@@ -53,16 +53,18 @@ export class DataService {
 
 
   //Categories for awards that are not complete and in some state of processing
-  private _inProgressTypes = ["New Submissions", "J1QC", "Ready for Boarding", "Board Members", "CMD GRP", "J1 Final Stages", "Mailed this Week", "Unknown", "Total"];
+  private _inProgressTypes = ["New Submissions", "J1QC", "Ready for Boarding", "Board Members", "Boarding Complete", "CMD GRP", "With SOCOM/HRC", "J1 Final Stages","Mailed Previous Week", "Unknown", "Total"];
 
   private _inProgressDescriptions = {
-    "New Submissions": "Awards Pending Review, Pending Review (Resubmit), Accept for Action, Accept for Action - Resubmit, ReQC (Anything in New and J1 Button).",
+    "New Submissions": "Awards Pending Review, Pending Review (Resubmit), Accept for Action, Accept for Action - Resubmit, Accept for Action - ReQC (Anything in New and J1 Button).",
     "J1QC": "Awards in J1 QC or SJS QC state.",
     "Ready for Boarding": "Awards ready to be boarded.",
     "Board Members" : "Awards currently in boarding process and assigned to a board member.",
+    "Boarding Complete" : "Awards in which the boarding process is complete.",
     "CMD GRP": "Awards in which boarding is complete and waiting for CG's signature.",
+    "With SOCOM/HRC" : "Awards awaiting action at SOCOM or HRC",
     "J1 Final Stages": "Completed awards awaiting distribution.",
-    "Mailed this Week" : "Awards that have been mailed in the current week and have been archived.",
+    "Mailed Previous Week" : "Awards that were mailed during previous week (Monday..Sunday).",
     "Unknown": "Awards that do not fall into a category above. This is based on award status in supporting SharePoint list.",
     "Total" : "Total number of awards above."
 
@@ -371,12 +373,16 @@ export class DataService {
 
   //Return a new Award object from each award retreived from data pull
   private _parseAwardJson(awards: any) {
-    let processed = awards.d.results.map(function (el) {
-      //console.log('dataService._parseAwardJson: el is', el);
 
-      return new Award(el);
+   // let processed = awards.d.results.map(function (el) {
+    let processed = awards.d.results.map(el => { return new Award(el,this.timeService) } );
 
-    })
+    //  return new Award(el);
+   // return new Award(el,this.timeService);
+
+   // })
+
+
     //  console.log('_parseAwardJson:el is',awards);
     console.log('dataService: processed awards is', processed);
 

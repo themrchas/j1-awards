@@ -11,7 +11,6 @@ export class TimeService {
 
 
   //Creates a time range in format eg 'Jul 2019' looking back a specific number of months
- // createTimeRange(currentTime:string, monthLookback?:number): Array<string> {
   createTimeRange(currentTime:moment.Moment, monthLookback?:number): Array<string> {
     let timeRange = [];
 
@@ -45,11 +44,27 @@ export class TimeService {
   }
 
   //Returns the current fiscal year as YY
-  getCurrentPhysicalYear() {
+  getCurrentPhysicalYear(): string {
     return moment().format("YYYY");
   }
 
+  
+  /* Returns true/false if the date is within a previous range from previous Monday to previous Sunday (inclusive).
+   * Example:  Today is 5/11/2020.  Function returns true if this date falls  between 5/4/2020 and 5/10/2020.
+   */
+  dateIsInPreviousWeekInterval(date:string): boolean {
+
+    const endSunday: moment.Moment = moment().day(0);
+    const startMonday: moment.Moment = moment().day(-6);
+    return moment(date).isBetween(startMonday,endSunday,'day','[]');
 
 
+  }
+
+ // Returns true/false if the date falls within the previous year,
+  dateIsInTrailingYearInterval(date:string): boolean {
+
+    return moment.duration(moment().diff(moment(date))).as('years') <= 1;
+  }
 
 } //TimeService

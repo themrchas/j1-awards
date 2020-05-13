@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 
+import {FiscalYear} from './../model/fiscalYear';
+
 import * as moment from 'moment';
 
 @Injectable({
@@ -8,6 +10,23 @@ import * as moment from 'moment';
 export class TimeService {
 
   constructor() { }
+
+  //Current fiscal year information
+  private _fiscalYear: FiscalYear = {fiscalYearStartDate:"", fiscalYearEndDate:""};
+
+
+  set fiscalYear(value: FiscalYear) {
+    this._fiscalYear.fiscalYearStartDate = value.fiscalYearStartDate;
+    this._fiscalYear.fiscalYearEndDate = value.fiscalYearEndDate;
+  }
+
+
+
+  get fiscalYear(): FiscalYear {
+    return this._fiscalYear;
+  }
+
+ 
 
 
   //Creates a time range in format eg 'Jul 2019' looking back a specific number of months
@@ -29,8 +48,31 @@ export class TimeService {
     timeRange.push(baseTimeDate);
     return timeRange
 
-
   }
+
+
+  //Calculate and return moment dates corresponding to current fiscal year dates.  Oct 1, 20XX - Sep 30, 20XX
+  getCurrentFiscalYearDates() : FiscalYear {
+
+    var current_fiscal_year_start;
+    var current_fiscal_year_end
+
+    if (moment().quarter() == 4) {
+       current_fiscal_year_start = moment().month('October').startOf('month');
+       current_fiscal_year_end = moment().add(1,'year').month('September').endOf('month');                  
+      
+    } else {
+      current_fiscal_year_start = moment().subtract(1,'year').month('October').startOf('month');
+      current_fiscal_year_end = moment().month('September').endOf('month');                   
+      
+    };
+
+    this.fiscalYear = { fiscalYearStartDate: current_fiscal_year_start.toISOString(), fiscalYearEndDate: current_fiscal_year_end.toISOString() };
+
+    return { fiscalYearStartDate: current_fiscal_year_start.toISOString(), fiscalYearEndDate: current_fiscal_year_end.toISOString() };
+  } //getCurrentFiscalYear
+
+
 
  
  subtractYearFromDate(baseDate: string): string {

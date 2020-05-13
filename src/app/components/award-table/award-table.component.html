@@ -1,11 +1,17 @@
 
-<table mdbTable bordered="true" small="true" class="text-center">
+
+<button (click)="switchMatrixView()">Switch Matrix View</button>
+
+<div style="position:relative">
+
+
+<table mdbTable bordered="true" small="true" class="text-center" style="position:absolute; z-index:1">
   <thead>
     <tr >
       <th colspan="100%">{{matrixTitle}}</th>
     </tr>
     <tr style="background-color: #c9feff;">
-      <th>Type/Unit</th>
+      <th>1 Type/Unit</th>
       <th *ngFor="let unit of unitsList">{{unit}}</th>
       <th class="total-row">Total</th>
     </tr>
@@ -27,5 +33,38 @@
     </tr>
   </tbody>
 </table> 
+
+
+<table mdbTable bordered="true" small="true" class="text-center" style="position:absolute; z-index:2" >
+  <thead>
+    <tr >
+      <th colspan="100%">{{matrixTitle}}</th>
+    </tr>
+    <tr style="background-color: #c9feff;">
+      <th>2 Type/Unit</th>
+      <th *ngFor="let unit of unitsList">{{unit}}</th>
+      <th class="total-row">Total</th>
+    </tr>
+
+  </thead>
+  <tbody>
+    <tr mdbTableCol *ngFor="let award of awardTypes">
+      <th scope="row" [class.misc]="award == 'MISC'">{{award == "MISC" ? catchAllLabel : award}}</th>
+    
+      <td *ngFor="let unit of unitsList">{{awardBreakDown[unit][award]}}</td>
+    
+      <td class="total-row">{{award | displayRowTotal:awardBreakDown}}</td>
+    </tr>
+    <tr>
+      <th class="total-row">Total</th>
+      <td class="total-row" *ngFor="let unit of unitsList">{{unit | displayColTotal:awardBreakDown}}</td>
+      <td class="total-row">{{awardCount}}</td>
+    
+    </tr>
+  </tbody>
+</table> 
+
+
+</div>
 
 

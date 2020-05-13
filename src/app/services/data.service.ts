@@ -8,6 +8,7 @@ import { ConfigProviderService } from './config-provider.service';
 import { TimeService } from "./time.service";
 
 import {Award} from './../model/award';
+import {FiscalYear} from './../model/fiscalYear';
 
 import * as _  from 'lodash';
 import * as moment from 'moment';
@@ -157,10 +158,13 @@ export class DataService {
 
     const defaultInitialDate = moment();
 
+    const fiscalYear: FiscalYear = this.timeService.getCurrentFiscalYearDates();
+
     this.monthGrid = this.timeService.createTimeRange(defaultInitialDate);
 
 
-    return forkJoin([this.getData(this.timeService.subtractYearFromDate(defaultInitialDate.format('YYYY-MM-DD')), defaultInitialDate.toISOString()), this.getAwardMatrixHeaderInfo()])
+
+    return forkJoin([this.getData(this.timeService.subtractYearFromDate(defaultInitialDate.format('YYYY-MM-DD')), defaultInitialDate.toISOString(), fiscalYear.fiscalYearStartDate, fiscalYear.fiscalYearEndDate), this.getAwardMatrixHeaderInfo()])
     // return forkJoin([this.getData(defaultInitialDate,"2020-01-16T00:00:00Z"), this.getAwardMatrixHeaderInfo()])
     // return forkJoin([this.getData(defaultInitialDate), this.getAwardMatrixHeaderInfo()])
   } //getInitialAwardData
@@ -326,7 +330,7 @@ export class DataService {
 
 
   //Grabs data that will be used in the matrix
-  getMatrixData(startDate: string): Observable<any> {
+ /* getMatrixData(startDate: string): Observable<any> {
     console.log('data.service: Executing getData');
     return this.spService.getData(startDate)
       .pipe(
@@ -334,14 +338,14 @@ export class DataService {
         map(el => this._parseAwardJson(el))  //Can we return an empty value?????????????
         //  map(el => { return this._parseAwardJson(el) } ),
         //     tap(el => console.log('dataService.getData: mapped data in getData is',el))
-      )
-  } //getMatrixData
+      ) 
+  }  *///getMatrixData
 
 
   //Get award data from SharePoint list
-  getData(startDate: string, endDate?: string): Observable<any> {
+  getData(startDate: string, endDate: string, startFiscalYear: string, endFiscalYear: string): Observable<any> {
     console.log('data.service: Executing getData');
-    return this.spService.getData(startDate, endDate)
+    return this.spService.getData(startDate, endDate, startFiscalYear, endFiscalYear)
       .pipe(
         //     tap(val => console.log('dataService: tap: spService.getData call returned', val)),
         map(el => this._parseAwardJson(el))  //Can we return an empty value?????????????

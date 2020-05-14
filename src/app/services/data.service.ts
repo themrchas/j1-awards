@@ -29,8 +29,14 @@ export class DataService {
   //Note that the function 'doUseInMatrix' will weed out any one-off completed awards in which the award type of organization wasn't completely filled out.
   private _awardsForMatrix: Array<Award>;
 
-  //The complete cartesian product of awards x units filled out with counts.  
+  //List of all awards that have been read and will be used in the 'fiscal year' award matrix
+  private _awardsForFiscalMatrix: Array<Award>;
+
+  //The complete cartesian product of awards x units filled out with numerical counts.  
   private _awardBreakDown: any;
+
+  //The complete cartesian product of awards x units filled out with numerical counts that will be used in the fiscal year matrix. 
+  private _fiscalAwardBreakDown
 
   //Contains a breakdown of awards that are currently in some step of processing and are not counted in the matrix stats.
   //This info is categorized as 'New Submissions', 'J1QC', 'Ready for Boarding', etc.
@@ -97,9 +103,22 @@ export class DataService {
     this._awardBreakDown = value;
   }
 
+  get fiscalAwardBreakDown() {
+    return this._fiscalAwardBreakDown;
+  }
+
+  set fiscalAwardBreakDown(value: any) {
+    this._fiscalAwardBreakDown = value;
+  }
+
   get awardsForMatrix() {
     return this._awardsForMatrix;
   }
+
+  get awardsForFiscalMatrix() {
+    return this. _awardsForFiscalMatrix;
+  }
+  
 
   get completionTimesByMonth(): Object {
     return this._completionTimesByMonth;
@@ -164,7 +183,7 @@ export class DataService {
 
 
 
-    return forkJoin([this.getData(this.timeService.subtractYearFromDate(defaultInitialDate.format('YYYY-MM-DD')), defaultInitialDate.toISOString(), fiscalYear.fiscalYearStartDate, fiscalYear.fiscalYearEndDate), this.getAwardMatrixHeaderInfo()])
+    return forkJoin([this.getData(this.timeService.subtractYearFromDate(defaultInitialDate.format('YYYY-MM-DD')), defaultInitialDate.toISOString(), fiscalYear.fiscalYearStartDate.toISOString(), fiscalYear.fiscalYearEndDate.toISOString()), this.getAwardMatrixHeaderInfo()])
     // return forkJoin([this.getData(defaultInitialDate,"2020-01-16T00:00:00Z"), this.getAwardMatrixHeaderInfo()])
     // return forkJoin([this.getData(defaultInitialDate), this.getAwardMatrixHeaderInfo()])
   } //getInitialAwardData
@@ -262,6 +281,9 @@ export class DataService {
 
     //Grab total number of in progress awards
     this.awardsInProcessing['Total'] = _.reduce(this.awardsInProcessing, function (result, val) { return result + val }, 0);
+
+    //Get award counts/categorization of those to be used in the fiscal year matrix
+    this.getAwardsForFiscalMatrix();
 
     //Break down completed awards over past 12 (default) months
     this.categorizeCompletedAwards();
@@ -465,6 +487,71 @@ export class DataService {
     return this.awardsForMatrix.filter(award => award.useInMatrix).length;
   } //getTotalMatrixAwardsCount
 
+
+  //Create award counts that should be used in fiscal year matrix
+private getAwardsForFiscalMatrix(): void {
+
+ this.fiscalAwardBreakDown = {};
+
+  //Any awards listed in the configProviderService 'miscAwards' property are awards that are to be collected into one metric
+  let configProviderMiscAwards: string = (this.configProviderService.config.miscAwards).join('|');
+  let miscAwardsRegEx = new RegExp(configProviderMiscAwards);
+
+  this.configProviderService.config.doLog && console.log('getAwardsForFiscalMatrix: raw data list after initial processing for fiscal year awards is', this.awardsForFiscalMatrix);
+  
+  //Grab data identified as to be used in the matrix 
+  this.awardsForFiscalMatrix.filter(award => this.doUseInMatrix(award, this.configProviderService.config.ignoreOtherAwards)).
+    forEach(processedAward => {
+
+      let award: string = (processedAward.awardSubType != null) ? processedAward.awardSubType : processedAward.awardType;
+
+      //If we have a misc award, classify it as such
+      if (miscAwardsRegEx.test(award)) {
+        this.configProviderService.config.doLog && console.log("getAwardsForFiscalMatrix: data.service.analyzeAwardData award number", processedAward.awardNumber, "using Misc for award type:", award);
+        award = "MISC";
+
+      }
+
+
+      //Set the submitting unit
+      let unit: string = (processedAward.subOrganization != null) ? processedAward.subOrganization : processedAward.organization;
+
+      this.configProviderService.config.doLog && console.log('getAwardsForFiscalMatrix: data.service.analyzeAwardData processing award with award type', award, 'unit is', unit, 'and processedAward is', processedAward);
+
+      //Create entry if either award type or award type + unit does not exit
+      if (!this.fiscalAwardBreakDown[unit]) {
+        this.fiscalAwardBreakDown[unit] = {};
+        this.fiscalAwardBreakDown[unit][award] = 1;
+      }
+      else if (!this.fiscalAwardBreakDown[unit][award])
+        this.fiscalAwardBreakDown[unit][award] = 1;
+      else
+        this.fiscalAwardBreakDown[unit][award] = this.fiscalAwardBreakDown[unit][award] + 1;
+
+
+    });
+
+  this.configProviderService.config.doLog && console.log('getAwardsForFiscalMatrix: data.service.analyzeAwardData: awardBreakDown is', this.fiscalAwardBreakDown)
+  this.configProviderService.config.doLog && console.log('getAwardsForFiscalMatrix: data.service.analyzeAwardData: awardTypesList is', this.awardTypesList);
+
+
+  //Any member of the cartesian product units x award types that is blank gets a 0
+  //this.unitsList.forEach(function(unit) {
+  this.unitsList.forEach(unit => {
+
+    this.fiscalAwardBreakDown[unit] = this.fiscalAwardBreakDown[unit] || {};
+
+
+    this.awardTypesList.forEach(award => {
+
+      this.fiscalAwardBreakDown[unit][award] = this.fiscalAwardBreakDown[unit][award] || 0;
+    })
+
+  })
+
+}
+
+
   //Categorize any awards completed in the past 12 months.  12 months is the default based on data fetch.
   private categorizeCompletedAwards() {
 
@@ -578,6 +665,54 @@ export class DataService {
 
 
   } //categorizeQCCompletedAwards
+
+
+
+  //This function performs a secondary check on whether an award should be included in the 'Award Break Down' matrix.
+    //It is put here so that we can get access to user supplied 'Other' award sub award types that are included in the 
+    //config file and to be ignored.  This was not explicitly done in Award class definition in order to maintain a separation of concerns such that
+    //the Award class does not have the ConfigProviderService injected to get access to 'Other' award subtypes to ignore.
+    //
+    //In addition, the 'useInMatrix' property of the Award class  will be set to false as required.  This allows this property to be 
+    //used in other parts of the app.
+    doUseInMatrix(award: Award, ignoreOtherAwardTypes: Array<string>): boolean {
+
+      let returnVal = award.useInMatrix;
+
+      //Convert the 'Other' award subtypes to a regex acceptable string
+      let toIgnore: string = ignoreOtherAwardTypes.join("|");
+
+      //These awards will not be included in the matrix
+      let regexIgnore = new RegExp(toIgnore);
+
+      //Used to screen award sub types which are blank
+      //let regexNonAlphaNumeric = /\W/;
+      let regexNonAlphaNumeric = /^\W*$/;
+
+      //Do not use award in matrix stats if organization is 'Other' and sub org is not defined
+      if (award.organization == "Other" && award.subOrganization == null) {
+        console.error("Award '" + award.awardNumber + "' has award organization 'Other' but no sub organization was chosen.  This award will be not be used in Award Break Down matrix (if applicable).");
+        award.useInMatrix = false;
+        returnVal = false;
+      }
+      //Do not use in matrix stats if award type is 'Other' and no award sub type is chosen
+      //The match("") is put in to take care of any choice column that is empty but not null (like a space)
+      else if (award.awardType == "Other" && (!award.awardSubType || award.awardSubType.match(regexNonAlphaNumeric))) {
+        console.error("Award '" + award.awardNumber + "' has award type 'Other' but no or empty award subtype. This award will be not be used in Award Break Down matrix (if applicable).");
+        award.useInMatrix = false;
+        returnVal = false;
+      }
+      //Do not use in matrix stats if award type is 'Other' and award sub type is found in config file property 'ignoreOtherAwardTypes'
+      else if (award.awardType == "Other" && (regexIgnore.test(award.awardSubType))) {
+        console.error("Award '" + award.awardNumber + "' has award type 'Other' and award subtype '" + award.awardSubType + "' which is designated as not to be used in config file. This award will be not be used in Award Break Down matrix (if applicable).");
+        award.useInMatrix = false;
+        returnVal = false;
+      }
+
+
+      return returnVal;
+
+    } //doUseInMatrix
 
 
 

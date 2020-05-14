@@ -1,4 +1,7 @@
+import * as moment from 'moment';
+
 export interface FiscalYear {
-    fiscalYearStartDate: string;
-    fiscalYearEndDate: string;
+    fiscalYearStartDate: moment.Moment;
+    fiscalYearEndDate: moment.Moment
+    
 }

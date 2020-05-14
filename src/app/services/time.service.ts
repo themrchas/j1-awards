@@ -12,15 +12,13 @@ export class TimeService {
   constructor() { }
 
   //Current fiscal year information
-  private _fiscalYear: FiscalYear = {fiscalYearStartDate:"", fiscalYearEndDate:""};
+  private _fiscalYear: FiscalYear = {fiscalYearStartDate:null, fiscalYearEndDate:null};
 
 
   set fiscalYear(value: FiscalYear) {
-    this._fiscalYear.fiscalYearStartDate = value.fiscalYearStartDate;
-    this._fiscalYear.fiscalYearEndDate = value.fiscalYearEndDate;
+    this._fiscalYear.fiscalYearStartDate = moment(value.fiscalYearStartDate);
+    this._fiscalYear.fiscalYearEndDate = moment(value.fiscalYearEndDate);
   }
-
-
 
   get fiscalYear(): FiscalYear {
     return this._fiscalYear;
@@ -67,14 +65,18 @@ export class TimeService {
       
     };
 
-    this.fiscalYear = { fiscalYearStartDate: current_fiscal_year_start.toISOString(), fiscalYearEndDate: current_fiscal_year_end.toISOString() };
+    this.fiscalYear = { fiscalYearStartDate: current_fiscal_year_start, fiscalYearEndDate: current_fiscal_year_end };
 
     return { fiscalYearStartDate: current_fiscal_year_start.toISOString(), fiscalYearEndDate: current_fiscal_year_end.toISOString() };
   } //getCurrentFiscalYear
 
 
+  //Return true is the argument 'date'falls in thw current fiscal year.
+  dateIsInCurrentFiscalYear(date: string) : boolean {
+    return moment(date).isBetween(this.fiscalYear.fiscalYearStartDate,this.fiscalYear.fiscalYearEndDate,null,'[]');
+  }
 
- 
+
  subtractYearFromDate(baseDate: string): string {
     // return moment(baseDate).subtract(1,'years').format("YYYY-MM-DD:THH:mm:ss");
     return moment(baseDate).subtract(1,'years').toISOString();

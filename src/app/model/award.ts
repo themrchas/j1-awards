@@ -58,6 +58,9 @@ export class Award {
 
     //True if the the award has a 'Date Mailed' timestamp entry within the past ??7 day or week?? 
     private _mailedThisWeek: boolean;
+
+    //True if the award complete date falls in the current fiscal year
+    private _useInFiscalMatrix;
     
 
    // constructor(rawAward: any) {
@@ -91,31 +94,28 @@ export class Award {
         this._dateStartBoarding = (rawAward.DateSentToBoarding) ? moment(rawAward.DateSentToBoarding).format("YYYY-MM-DD") : null;
         this._dateCompleteBoarding = (rawAward.Date_x0020_Boarding_x0020_Comple) ? moment(rawAward.Date_x0020_Boarding_x0020_Comple).format("YYYY-MM-DD") : null;
 
-        //Date mailed
+        //Date the award was mailed
         this._dateMailed = (rawAward.DateMailed) ?  moment(rawAward.DateMailed).format("YYYY-MM-DD") : null;
 
         //Award was completed in the current year and date completed has a value.  This award is considered 'Complete' for app purposes.
         //The suitability of the award to be used in the matrix is further defined in data.servce
         this._useInMatrix = (this._dateAwardComplete) && (moment().format("YYYY") == moment(this._dateAwardComplete).format("YYYY") )
+
+        //True is the award is completed and the completion date falls in the current fiscal year.
+        this._useInFiscalMatrix = (this._dateAwardComplete) && timeService.dateIsInCurrentFiscalYear(this._dateAwardComplete);
               
         //True if the award is used in the in-progress stats
         this._useInInprogress = false;
 
         //This award is to be used in the Complete Awards chart if has a valid complete and accepted date and completion date is less than/equal to a year old.
-        this._useInChartComplete = (this._dateAwardComplete) && (this._dateAccepted) &&
-          //  (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
-          (timeService.dateIsInTrailingYearInterval(this._dateAwardComplete));
+        this._useInChartComplete = (this._dateAwardComplete) && (this._dateAccepted) && (timeService.dateIsInTrailingYearInterval(this._dateAwardComplete));
 
         //This award to be used in the Boarding Time chart if time difference between completed award date and now is less than a year
-        this._useInBoardingTimeChart = (this._dateAwardComplete) && (this._dateStartBoarding) && (this._dateCompleteBoarding) &&
-         //   (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
-         (timeService.dateIsInTrailingYearInterval(this._dateAwardComplete));
+        this._useInBoardingTimeChart = (this._dateAwardComplete) && (this._dateStartBoarding) && (this._dateCompleteBoarding) && (timeService.dateIsInTrailingYearInterval(this._dateAwardComplete));
 
         //This award to be used in the QC chart if time difference between completed award date and now is less than a year and both 
         //_dateSentToQC and _date CompleteQC are defined
-        this._useInQCTimeChart = (this._dateAwardComplete) && (this._dateSentToQC) && (this._dateCompleteQC) &&
-         //   (moment.duration(moment().diff(moment(this._dateAwardComplete))).as('years') <= 1);
-            (timeService.dateIsInTrailingYearInterval(this._dateAwardComplete));
+        this._useInQCTimeChart = (this._dateAwardComplete) && (this._dateSentToQC) && (this._dateCompleteQC) && (timeService.dateIsInTrailingYearInterval(this._dateAwardComplete));
 
         /* This award will be counted in the in-progress stats as 'Mailed previous Week'.
          * The criteria is as follows: Target briefing date is every Monday. This metric will look back from previous Monday 
@@ -259,6 +259,14 @@ export class Award {
 
     set useInMatrix(value:boolean) {
         this._useInMatrix = value;
+    }
+
+    get useInFiscalMatrix(): boolean {
+        return this._useInFiscalMatrix;
+    }
+
+    set useInFiscalMatrix(value: boolean) {
+        this._useInFiscalMatrix = value;
     }
 
      get useInChartComplete() {

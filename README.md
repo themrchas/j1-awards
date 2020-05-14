@@ -71,4 +71,4 @@ Award identified as complete:
 		-not used in chart based criteria
 
 
-
+5/14 - can we remove doUseInMatrix() out of enclosing function?  It has been moved out already to allow matrix awards to be processed.

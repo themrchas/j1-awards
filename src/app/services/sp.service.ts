@@ -25,7 +25,8 @@ export class SpService {
   constructor(private httpClient: HttpClient, private configProvider:ConfigProviderService, private env:EnvService) { }
 
 
-getData(startDate: string, endDate: string, fiscalYearStartDate: string, fiscalYearEndDate: string):Observable<any> {
+//getData(rowLimit: number,startRow:number,startDate: string, endDate: string, fiscalYearStartDate: string, fiscalYearEndDate: string):Observable<any> {
+  getData(startDate: string, endDate: string, fiscalYearStartDate: string, fiscalYearEndDate: string, rowLimit: number, startRow:number)  {
 
     
 
@@ -65,10 +66,44 @@ getData(startDate: string, endDate: string, fiscalYearStartDate: string, fiscalY
        //  map(el =>  this._parseAwardJson(el) ),
     //   map(el => { return this._parseAwardJson(el)} ),
      //     tap(el => console.log('mapped data in getData is',el))
-       )
+       ).toPromise();
 
 
 }
+
+
+wrapRest(startDate: string, endDate: string, fiscalYearStartDate: string, fiscalYearEndDate: string, rowLimit?: number, startRow?: number, allResults?:Array<any>)  {
+
+  rowLimit = rowLimit || 5;
+  startRow = startRow || 1;
+  var allResults = allResults || [];
+
+
+  this.configProvider.config.doLog && console.log('sp.service:wrapRest - startRow', startRow);
+  return this.getData(startDate, endDate, fiscalYearStartDate, fiscalYearEndDate, rowLimit, startRow).then(function(data) {
+
+    this.configProvider.config.doLog && console.log('sp.service:wrapRest - toPromise returmed',data);
+
+
+    var relevantResults = data.d.query.PrimaryQueryResult.RelevantResults;
+
+    allResults = allResults.concat(relevantResults.Table.Rows);
+    if (relevantResults.TotalRows > startRow + relevantResults.RowCount) {
+      return this.wrapRest(startDate, endDate, fiscalYearStartDate, fiscalYearEndDate, rowLimit, startRow, allResults);
+    }
+
+    
+    return allResults;
+  
+  }  
+
+  //return new Observable(allResults);
+
+
+} //wrapRest
+
+
+
 
   
  

@@ -183,7 +183,7 @@ export class DataService {
 
 
 
-    return forkJoin([this.getData(this.timeService.subtractYearFromDate(defaultInitialDate.format('YYYY-MM-DD')), defaultInitialDate.toISOString(), fiscalYear.fiscalYearStartDate.toISOString(), fiscalYear.fiscalYearEndDate.toISOString()), this.getAwardMatrixHeaderInfo()])
+    return forkJoin([this.getData(this.timeService.subtractYearFromDate(defaultInitialDate.format('YYYY-MM-DD')), defaultInitialDate.toISOString(), fiscalYear.fiscalYearStartDate, fiscalYear.fiscalYearEndDate), this.getAwardMatrixHeaderInfo()])
     // return forkJoin([this.getData(defaultInitialDate,"2020-01-16T00:00:00Z"), this.getAwardMatrixHeaderInfo()])
     // return forkJoin([this.getData(defaultInitialDate), this.getAwardMatrixHeaderInfo()])
   } //getInitialAwardData
@@ -283,7 +283,7 @@ export class DataService {
     this.awardsInProcessing['Total'] = _.reduce(this.awardsInProcessing, function (result, val) { return result + val }, 0);
 
     //Get award counts/categorization of those to be used in the fiscal year matrix
-    this.getAwardsForFiscalMatrix();
+    //this.getAwardsForFiscalMatrix();
 
     //Break down completed awards over past 12 (default) months
     this.categorizeCompletedAwards();
@@ -367,7 +367,8 @@ export class DataService {
   //Get award data from SharePoint list
   getData(startDate: string, endDate: string, startFiscalYear: string, endFiscalYear: string): Observable<any> {
     console.log('data.service: Executing getData');
-    return this.spService.getData(startDate, endDate, startFiscalYear, endFiscalYear)
+ //   return this.spService.getData(startDate, endDate, startFiscalYear, endFiscalYear)
+ return this.spService.wrapRest(startDate, endDate, startFiscalYear, endFiscalYear)
       .pipe(
         //     tap(val => console.log('dataService: tap: spService.getData call returned', val)),
         map(el => this._parseAwardJson(el))  //Can we return an empty value?????????????

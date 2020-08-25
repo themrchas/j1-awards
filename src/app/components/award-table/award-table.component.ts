@@ -55,8 +55,8 @@ export class AwardTableComponent implements OnInit {
     
   } //ngOnInit
 
-  switchMatrixView() {
-    console.log('pressed switch matrix view button');
-  }
+ // switchMatrixView() {
+  //  console.log('pressed switch matrix view button');
+ // }
 
 } //AwardTableComponent

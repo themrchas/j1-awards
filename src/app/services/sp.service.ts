@@ -26,8 +26,8 @@ export class SpService {
 
 
 //getData(rowLimit: number,startRow:number,startDate: string, endDate: string, fiscalYearStartDate: string, fiscalYearEndDate: string):Observable<any> {
-  getData(startDate: string, endDate: string, fiscalYearStartDate: string, fiscalYearEndDate: string, rowLimit: number, startRow:number)  {
-
+ // getData(startDate: string, endDate: string, fiscalYearStartDate: string, fiscalYearEndDate: string, rowLimit: number, startRow:number)  {
+  getData(startDate: string,endDate?: string):Observable<any> {
     
 
   this.awardListRestEndPointBase = this.env.listWeb+"/_api/web/lists/getbytitle('"+this.configProvider.config.awardList+"')/items";
@@ -52,7 +52,7 @@ export class SpService {
   //Create filter used in query. This consists of 'inprogress items' plus completed awards between start and end dates. 
   filter = "?$top=1000&$filter=("+awardStatusesOfInterest.join(" ") +
             " or ( (DateComplete ge datetime'"+startDate+"') and (DateComplete le datetime'"+endDate+"'))" +
-            " or ( (DateComplete ge datetime'"+fiscalYearStartDate+"') and (DateComplete le datetime'"+fiscalYearEndDate+"'))" +
+            //" or ( (DateComplete ge datetime'"+fiscalYearStartDate+"') and (DateComplete le datetime'"+fiscalYearEndDate+"'))" +
             ")";
   
   //The endpoint used to pull award data.  Note that this includes a filter.
@@ -66,46 +66,11 @@ export class SpService {
        //  map(el =>  this._parseAwardJson(el) ),
     //   map(el => { return this._parseAwardJson(el)} ),
      //     tap(el => console.log('mapped data in getData is',el))
-       ).toPromise();
+  )
 
 
 }
 
-
-wrapRest(startDate: string, endDate: string, fiscalYearStartDate: string, fiscalYearEndDate: string, rowLimit?: number, startRow?: number, allResults?:Array<any>)  {
-
-  rowLimit = rowLimit || 5;
-  startRow = startRow || 1;
-  var allResults = allResults || [];
-
-
-  this.configProvider.config.doLog && console.log('sp.service:wrapRest - startRow', startRow);
-  return this.getData(startDate, endDate, fiscalYearStartDate, fiscalYearEndDate, rowLimit, startRow).then(function(data) {
-
-    this.configProvider.config.doLog && console.log('sp.service:wrapRest - toPromise returmed',data);
-
-
-    var relevantResults = data.d.query.PrimaryQueryResult.RelevantResults;
-
-    allResults = allResults.concat(relevantResults.Table.Rows);
-    if (relevantResults.TotalRows > startRow + relevantResults.RowCount) {
-      return this.wrapRest(startDate, endDate, fiscalYearStartDate, fiscalYearEndDate, rowLimit, startRow, allResults);
-    }
-
-    
-    return allResults;
-  
-  }  
-
-  //return new Observable(allResults);
-
-
-} //wrapRest
-
-
-
-
-  
  
   //Return contents of list used to create column and row labels in completed awards matrix.
   getMatrixHeaders():Observable<any> {
